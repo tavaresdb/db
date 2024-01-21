@@ -43,9 +43,9 @@ Tagging é uma técnica para garantir que as chaves sejam armazenadas no mesmo s
 Quando o Redis é usado para armazenar dados, as chaves devem sempre ser mapeadas para as mesmas instâncias e o uso de tags deve ser adotado. Isso significa que não pode haver alterações no número de instâncias, caso contrário uma chave pode ser mapeada para uma instância incorreta. Uma maneira de resolver isso é criando cópias dos dados em outras instâncias para que cada chave seja replicada para várias instâncias e o sistema saiba como rotear as consultas. Essa abordagem é bem trabalhosa, já que essa lógica seria criada pelos desenvolvedores, e o Redis Cluster é feito para resolver esse tipo de problema. Em resumo, quando o Redis for usado como um cache, use consistent hashing para minimizar erros de cache. Quando for usado para armazenamento de dados, considere o Redis Cluster ou uma solução que garanta que os dados sejam replicados entre os nós e que cada instância saiba como rotear a consulta para instância certa.
 
 ## Implementações de escala vertical no Redis
-• client (Regra implementada na camada de aplicativo. Em Interatividade, por exemplo, há soluções que implementam a regra nessa camada);
-• proxy (À seguir será fornecido um exemplo com o programa twemproxy);
-• query router (Regra é transparente para o aplicativo, sendo de responsabilidade do server o roteamento das consultas, como por exemplo o Redis Cluster).
+• client: Regra implementada na camada de aplicativo;
+• proxy À seguir será fornecido um exemplo com o programa twemproxy;
+• query router Regra é transparente para o aplicativo, sendo de responsabilidade do server o roteamento das consultas, como por exemplo o Redis Cluster.
 
 Como estudo de caso, abordaremos aqui a implementação via proxy. O [twemproxy](https://github.com/twitter/twemproxy/), também conhecido como nutcracker, é um proxy rápido e leve para protocolo memcached e redis. Ele foi construído principalmente para reduzir o número de conexões com os servidores de cache no back-end. Dessa forma temos condições de dimensionar horizontalmente o cache, tornando-o distribuído.
 
