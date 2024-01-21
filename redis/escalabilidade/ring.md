@@ -45,9 +45,9 @@ Quando o Redis é usado para armazenar dados, as chaves devem sempre ser mapeada
 ## Implementações de escala vertical no Redis
 • client: Regra implementada na camada de aplicativo;
 
-• proxy À seguir será fornecido um exemplo com o programa twemproxy;
+• proxy: À seguir será fornecido um exemplo com o programa twemproxy;
 
-• query router Regra é transparente para o aplicativo, sendo de responsabilidade do server o roteamento das consultas, como por exemplo o Redis Cluster.
+• query: router Regra é transparente para o aplicativo, sendo de responsabilidade do server o roteamento das consultas, como por exemplo o Redis Cluster.
 
 Como estudo de caso, abordaremos aqui a implementação via proxy. O [twemproxy](https://github.com/twitter/twemproxy/), também conhecido como nutcracker, é um proxy rápido e leve para protocolo memcached e redis. Ele foi construído principalmente para reduzir o número de conexões com os servidores de cache no back-end. Dessa forma temos condições de dimensionar horizontalmente o cache, tornando-o distribuído.
 
