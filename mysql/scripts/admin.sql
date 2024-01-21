@@ -119,7 +119,7 @@ FLUSH TABLES WITH READ LOCK;
 LOCK TABLES tabname READ;
 
 -- Somente a sessão que emitiu o comando tem acesso completo a tabela, ninguém mais pode ler ou escrever
-LOCK TABLED tabname WRITE;
+LOCK TABLES tabname WRITE;
 
 -- Desbloqueio de tabelas
 UNLOCK TABLES;
