@@ -1,4 +1,6 @@
-# Escala horizontal
+# Redis Ring - O que é?
+
+## Escala horizontal
 Podemos usar réplicas para otimizar leituras e remover alguns gargalos na instância master, mas em alguns casos essa abordagem não é suficiente. Considere os cenários abaixo:
 
 • O total de dados à ser armazenado é maior do que o total de memória disponível;
