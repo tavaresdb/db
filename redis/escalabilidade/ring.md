@@ -34,7 +34,7 @@ Via escala horizontal podemos resolver os cenários acima. Eis alguns tipos:
 
    Conforme imagem abaixo, o diagrama demonstra como é feito o direcionamento das chaves para as instâncias. Nesse exemplo foi definido 1 ponto por instância, entretanto em ambiente produtivo é recomendável o uso de N pontos, pois assim facilitará a distribuição das chaves e manterá o ring equilibrado.
 
-   [](img/01.png)
+   ![](img/01.png)
 
 ## Tagging
 Tagging é uma técnica para garantir que as chaves sejam armazenadas no mesmo servidor. Escolha uma convenção para seus nomes de chaves e adicione um prefixo ou sufixo, por exemplo key_name:{tag}. Em seguida, decida como rotear essa chave com base no prefixo ou sufixo adicionado. Comandos como SDIFF, SINTER e SUNION exigem que todas as chaves sejam armazenadas na mesma instância.
@@ -101,7 +101,7 @@ redis-cli -p 22121
 
 A imagem abaixo demonstrará a definição de algumas chaves, entretanto é aconselhável que em paralelo crie outras sessões (Terminal 2, 3 e 4) para que seja possível acompanhar a distribuição dos dados entre os nós.
 
-[](img/02.png)
+![](img/02.png)
 
 > Terminal 2
 ```bash
@@ -109,7 +109,7 @@ redis-cli -p 6666
 monitor
 ```
 
-[](img/03.png)
+![](img/03.png)
 
 > Terminal 3
 ```bash
@@ -117,7 +117,7 @@ redis-cli -p 7777
 monitor
 ```
 
-[](img/04.png)
+![](img/04.png)
 
 > Terminal 4
 ```bash
@@ -125,11 +125,11 @@ redis-cli -p 8888
 monitor
 ```
 
-[](img/05.png)
+![](img/05.png)
 
 A implementação acima torna o twemproxy um ponto único de falha. Para mudar tal implementação, considere a arquitetura abaixo:
 
-[](img/06.png)
+![](img/06.png)
 
 ### Referência:
 
