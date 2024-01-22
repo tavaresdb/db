@@ -1,6 +1,6 @@
 # Redis Cluster - Instalação, configuração, adição de nós e remoção de nós
 
-## Preparação do ambiente, instalação e configuração do Redis
+### Preparação do ambiente, instalação e configuração do Redis
 ```bash
 apt install ruby-full
 gem install redis
@@ -125,7 +125,7 @@ cd ..
 ps aux | grep redis
 ```
 
-# Criação do cluster
+### Criação do cluster
 ```bash
 redis-cli --cluster create 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 --cluster-replicas 1
 ruby ./redis-rb-cluster-master/example.rb
@@ -142,7 +142,7 @@ redis-cli --cluster check 127.0.0.1:7000
 
 ![](img/09.png)
 
-Adição de shards
+### Adição de shards
 ```bash
 redis-cli --cluster add-node 127.0.0.1:7006 127.0.0.1:7000
 redis-cli --cluster add-node 127.0.0.1:7008 127.0.0.1:7000
@@ -151,7 +151,7 @@ redis-cli --cluster add-node 127.0.0.1:7008 127.0.0.1:7000
 ![](img/10.png)
 ![](img/11.png)
 
-Adição de réplicas aos shards recém incluídos
+### Adição de réplicas aos shards recém incluídos
 ```bash
 redis-cli -p 7000 cluster nodes
 redis-cli --cluster add-node 127.0.0.1:7007 127.0.0.1:7000 --cluster-slave --cluster-master-id UUID_PORT7006
@@ -164,7 +164,7 @@ redis-cli --cluster check 127.0.0.1:7000
 ![](img/14.png)
 ![](img/15.png)
 
-Rebalanceamento dos slots entre os shards
+### Rebalanceamento dos slots entre os shards
 ```bash
 redis-cli --cluster rebalance 127.0.0.1:7006 --cluster-use-empty-masters
 redis-cli --cluster check 127.0.0.1:7000
@@ -173,7 +173,7 @@ redis-cli --cluster check 127.0.0.1:7000
 ![](img/16.png)
 ![](img/17.png)
 
-Remoção de réplicas, para que posteriormente seja possível eliminar alguns shards
+### Remoção de réplicas, para que posteriormente seja possível eliminar alguns shards
 ```bash
 redis-cli --cluster del-node 127.0.0.1:7007 UUID_PORT7007
 redis-cli --cluster del-node 127.0.0.1:7009 UUID_PORT7009
@@ -182,7 +182,7 @@ redis-cli --cluster check 127.0.0.1:7000
 
 ![](img/18.png)
 
-Migração dos slots, do shard que será removido para um dos shards que permanecerá
+### Migração dos slots, do shard que será removido para um dos shards que permanecerá
 ```bash
 redis-cli --cluster reshard 127.0.0.1:7006 \
 --cluster-from UUID_PORT7006 \
@@ -201,7 +201,7 @@ redis-cli --cluster check 127.0.0.1:7000
 ![](img/20.png)
 ![](img/21.png)
 
-Rebalanceamento dos slots entre os shards
+### Rebalanceamento dos slots entre os shards
 ```bash
 redis-cli --cluster rebalance 127.0.0.1:7000
 redis-cli --cluster check 127.0.0.1:7000
@@ -210,7 +210,7 @@ redis-cli --cluster check 127.0.0.1:7000
 ![](img/22.png)
 ![](img/23.png)
 
-Remoção de shards
+### Remoção de shards
 ```bash
 redis-cli --cluster del-node 127.0.0.1:7006 UUID_PORT7006
 redis-cli --cluster del-node 127.0.0.1:7008 UUID_PORT7008
