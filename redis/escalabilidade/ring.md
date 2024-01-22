@@ -34,7 +34,7 @@ Via escala horizontal podemos resolver os cenários acima. Eis alguns tipos:
 
    Conforme imagem abaixo, o diagrama demonstra como é feito o direcionamento das chaves para as instâncias. Nesse exemplo foi definido 1 ponto por instância, entretanto em ambiente produtivo é recomendável o uso de N pontos, pois assim facilitará a distribuição das chaves e manterá o ring equilibrado.
 
-   ![](img/01.png)
+   [](img/01.png)
 
 ## Tagging
 Tagging é uma técnica para garantir que as chaves sejam armazenadas no mesmo servidor. Escolha uma convenção para seus nomes de chaves e adicione um prefixo ou sufixo, por exemplo key_name:{tag}. Em seguida, decida como rotear essa chave com base no prefixo ou sufixo adicionado. Comandos como SDIFF, SINTER e SUNION exigem que todas as chaves sejam armazenadas na mesma instância.
@@ -47,15 +47,15 @@ Quando o Redis é usado para armazenar dados, as chaves devem sempre ser mapeada
 
 • proxy: À seguir será fornecido um exemplo com o programa twemproxy;
 
-• query: router Regra é transparente para o aplicativo, sendo de responsabilidade do server o roteamento das consultas, como por exemplo o Redis Cluster.
+• query router: Regra é transparente para o aplicativo, sendo de responsabilidade do server o roteamento das consultas, como por exemplo o Redis Cluster.
 
 Como estudo de caso, abordaremos aqui a implementação via proxy. O [twemproxy](https://github.com/twitter/twemproxy/), também conhecido como nutcracker, é um proxy rápido e leve para protocolo memcached e redis. Ele foi construído principalmente para reduzir o número de conexões com os servidores de cache no back-end. Dessa forma temos condições de dimensionar horizontalmente o cache, tornando-o distribuído.
 
 > Terminal 1
 ```bash
 apt update
-apt install linux-libc-dev
-apt install gcc make net-tools
+apt install linux-libc-dev gcc make net-tools
+# Para instalação do Redis, consulte: https://github.com/tavaresdb/db/blob/main/redis/instala%C3%A7%C3%A3o/install.sh
 redis-server --port 6666 --daemonize yes
 redis-server --port 7777 --daemonize yes
 redis-server --port 8888 --daemonize yes
@@ -65,7 +65,7 @@ cd twemproxy-0.5.0
 ./configure
 make
 ./src/nutcracker --help
-vim config/nutcracker.yaml
+vi config/nutcracker.yaml
 ..
 my_cluster:
   listen: 127.0.0.1:22121
@@ -101,7 +101,7 @@ redis-cli -p 22121
 
 A imagem abaixo demonstrará a definição de algumas chaves, entretanto é aconselhável que em paralelo crie outras sessões (Terminal 2, 3 e 4) para que seja possível acompanhar a distribuição dos dados entre os nós.
 
-![](img/02.png)
+[](img/02.png)
 
 > Terminal 2
 ```bash
@@ -109,7 +109,7 @@ redis-cli -p 6666
 monitor
 ```
 
-![](img/03.png)
+[](img/03.png)
 
 > Terminal 3
 ```bash
@@ -117,7 +117,7 @@ redis-cli -p 7777
 monitor
 ```
 
-![](img/04.png)
+[](img/04.png)
 
 > Terminal 4
 ```bash
@@ -125,11 +125,11 @@ redis-cli -p 8888
 monitor
 ```
 
-![](img/05.png)
+[](img/05.png)
 
 A implementação acima torna o twemproxy um ponto único de falha. Para mudar tal implementação, considere a arquitetura abaixo:
 
-![](img/06.png)
+[](img/06.png)
 
 ### Referência:
 
