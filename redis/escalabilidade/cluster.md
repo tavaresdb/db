@@ -1,10 +1,49 @@
-# Redis Cluster - Instalação, configuração, adição de nós e remoção de nós
+# Redis Cluster
+
+## Visão geral
+O Redis é single-threaded (Pelo menos até o momento em que esse documento é escrito). Uma única instância do Redis não pode fazer uso de vários núcleos da CPU para processamento. Se os dados forem distribuídos entre duas instâncias, nosso sistema pode processar solicitações em paralelo, efetivamente dobrando a taxa de transferência (throughput).
+Esse padrão de divisão de dados entre vários servidores para fins de dimensionamento é chamado de sharding.
+Se dividirmos e distribuirmos nossos dados em dois shards, que são apenas duas instâncias do Redis, como saberemos onde procurar cada chave? Precisamos ter uma maneira de mapear consistentemente uma chave para um shard específico. O que o Redis usa é chamado de "Algorithmic sharding".
+O envio da chave para o shard ocorre da seguinte forma: É feito o hash da chave e, em seguida, devolvido o resultado do operador módulo pelo número total de shards.
+
+![](img/26.png)
+
+Mas o que acontece se aumentarmos o número de shards? Digamos que um novo shard é adicionado. Quando um client tenta ler a chave foo, por exemplo, será executada a função hash e será devolvido o resultado do operador módulo pelo novo número total de shards. Desta vez o número de shards será diferente, de dois para três. Consequentemente o resultado poderá ser diferente, nos apontando para um shard incorreto.
+
+![](img/27.png)
+
+Esse é um problema comum durante o processo de resharding. Isso pode ser resolvido refazendo todas as chaves na base, onde as mesmas serão movidas para o shard apropriado. Esta não é uma tarefa trivial, pois pode exigir tempo e recursos (O banco de dados pode não ser capaz de atingir seu pleno desempenho ou podem ficar indisponíveis).
+Redis usa uma abordagem inteligente para resolver este problema -- uma unidade lógica que fica entre a chave e o shard, chamado de hashslot.
+
+![](img/28.png)
+
+O número total de hashslots em um banco de dados é de 16384. Os hashslots são divididos entre os shards. Dessa forma slots de 0 a 8000 podem ser atribuídos ao shard 1 e os slots 8001 a 16384 podem ser atribuídos ao shard 2, por exemplo.
+Em um cluster Redis, na verdade, modificamos pelo número de hashslots, não pelo número de shards. Cada chave é atribuída a um hashslot. Quando precisamos refragmentar(reshard), os hashslots são movidos de um shard para outro, distribuindo os dados conforme necessário nas diferentes instâncias do Redis.
+
+![](img/29.png)
+
+Além do cluster Redis ser um sistema distribuído, o mesmo oferece alta disponibilidade. Alta disponibilidade refere-se à capacidade do cluster permanecer operacional mesmo diante de certas falhas. Por exemplo, o cluster pode detectar quando um shard primário falha e promove uma réplica como primário sem qualquer intervenção manual. Mas como isso é feito? Como é que um shard primário falhou? E como uma réplica é promovida à primária?
+Digamos que exista uma réplica para cada shard primário. Se todos os dados forem distribuídos entre três instâncias Redis, precisaremos de um cluster de seis membros, com três shards primários e três réplicas. Todos os seis membros estão conectados entre si via TCP e constantemente se comunicam e trocam mensagens. Essas mensagens permitem que o cluster determine quais shards estão ativos. Quando shards suficientes relatam que um determinado shard primário não está respondendo a eles, eles podem concordar em acionar um failover e promover a réplica para se tornar a nova primária.
+Quantos shards precisam concordar que um outro shard está offline antes do failover ser acionado? Bem, isso é configurável, mas há algumas diretrizes muito importantes que devem ser seguidas. Para evitar algo chamado split-brain em um cluster Redis, sempre mantenha um número ímpar de shards primários e duas réplicas por shard primário. Avalie a imagem à seguir...
+
+![](img/30.png)
+
+O grupo do lado esquerdo não será capaz de falar com o grupo do lado direito. Portanto o cluster pensará que está off-line e acionará o failover, resultando em um lado esquerdo com todos os shards primários.
+
+![](img/31.png)
+
+No lado direito os três membros também verão que os membros à esquerda estão offline e acionará um failover, resultando em um lado direito com todos os fragmentos primários.
+Ambos os lados, pensando que têm todas as primárias, continuarão recebendo solicitações de clientes que modificam dados. E isso é um problema, porque talvez o cliente **A** defina a chave foo do lado esquerdo, mas um cliente **B** define a mesma chave foo do lado direito. Quando a partição de rede é removida e os shards tentarem se unir, teremos um conflito, porque temos dois shards contendo dados diferentes, alegando ser o principal, e não teríamos como saber quais dados são válidos. Isso é chamado de split-brain e é um problema muito comum no mundo de sistemas distribuídos.
+Uma solução popular é sempre manter um número ímpar de elementos em seu cluster. Mais uma vez, para evitar esse tipo de conflito, sempre mantenha o número ímpar de shards primários e duas réplicas por shard primário, conforme demonstrado na imagem abaixo.
+
+![](img/32.png)
 
 ### Preparação do ambiente, instalação e configuração do Redis
 ```bash
+# Para instalação do Redis, consulte: https://github.com/tavaresdb/db/blob/main/redis/instala%C3%A7%C3%A3o/install.sh
+# A instalação do ruby não é crucial para o Redis. O tutorial aborda tal instalação, pois um script ruby será utilizado para avaliar o comportamento de uma possível app durante o processo de resharding/rebalanceamento. Caso não queira instalar esses componentes, não há necessidade de instalá-los. Inclusive em ambiente produtivo é recomendável termos servidores dedicados à banco de dados, porém pra finalidade desse tutorial tudo é concetrado em um único servidor.
 apt install ruby-full
 gem install redis
-# Para instalação do Redis, consulte: https://github.com/tavaresdb/db/blob/main/redis/instala%C3%A7%C3%A3o/install.sh
 mkdir cluster-test
 cd cluster-test
 wget https://github.com/antirez/redis-rb-cluster/archive/refs/heads/master.zip
@@ -226,7 +265,7 @@ Durante a POC foi utilizada a app example.rb, entretanto a consistency-test.rb t
 ![](img/25.png)
 
 ### Referências:
-
+https://developer.redis.com/operate/redis-at-scale
 https://redis.io/docs/reference/cluster-spec/
 https://redis.io/docs/management/scaling/
 https://github.com/antirez/redis-rb-cluster/tree/master/

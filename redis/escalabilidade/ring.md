@@ -21,16 +21,16 @@ Via escala horizontal podemos resolver os cenários acima. Eis alguns tipos:
 
    Assuma que a função hash retornará os seguintes valores por instância:
 
-   - hash(“server-1”) = 3;
-   - hash(“server-2") = 7;
-   - hash(“server-3”) = 11.
+   - hash("server-1") = 3;
+   - hash("server-2") = 7;
+   - hash("server-3") = 11.
 
    E a função hash retornará os seguintes valores por chave:
 
-   - hash(“testkey-1") = 3;
-   - hash(“testkey-2”) = 4;
-   - hash(“testkey-3") = 8;
-   - hash(“testkey-4”) = 12.
+   - hash("testkey-1") = 3;
+   - hash("testkey-2") = 4;
+   - hash("testkey-3") = 8;
+   - hash("testkey-4") = 12.
 
    Conforme imagem abaixo, o diagrama demonstra como é feito o direcionamento das chaves para as instâncias. Nesse exemplo foi definido 1 ponto por instância, entretanto em ambiente produtivo é recomendável o uso de N pontos, pois assim facilitará a distribuição das chaves e manterá o ring equilibrado.
 
