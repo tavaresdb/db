@@ -32,16 +32,18 @@ O grupo do lado esquerdo não será capaz de falar com o grupo do lado direito. 
 
 ![](img/31.png)
 
-No lado direito os três membros também verão que os membros à esquerda estão offline e acionará um failover, resultando em um lado direito com todos os fragmentos primários.
-Ambos os lados, pensando que têm todas as primárias, continuarão recebendo solicitações de clientes que modificam dados. E isso é um problema, porque talvez o cliente **A** defina a chave foo do lado esquerdo, mas um cliente **B** define a mesma chave foo do lado direito. Quando a partição de rede é removida e os shards tentarem se unir, teremos um conflito, porque temos dois shards contendo dados diferentes, alegando ser o principal, e não teríamos como saber quais dados são válidos. Isso é chamado de split-brain e é um problema muito comum no mundo de sistemas distribuídos.
+No lado direito os três membros também verão que os membros à esquerda estão offline e acionará um failover, resultando em um lado direito com todos os shards primários.
+Ambos os lados, pensando que têm todas as primárias, continuarão recebendo solicitações de clientes que modificam dados. E isso é um problema, porque talvez o cliente **A** defina a chave foo do lado esquerdo, mas um cliente **B** define a mesma chave foo do lado direito. Quando a partição de rede for removida e os shards tentarem se unir, teremos um conflito, porque teremos dois shards contendo dados diferentes, alegando ser o principal, e não teremos condições de saber quais dados são válidos. Isso é chamado de split-brain e é um problema conhecido no mundo de sistemas distribuídos.
 Uma solução popular é sempre manter um número ímpar de elementos em seu cluster. Mais uma vez, para evitar esse tipo de conflito, sempre mantenha o número ímpar de shards primários e duas réplicas por shard primário, conforme demonstrado na imagem abaixo.
 
 ![](img/32.png)
 
-### Preparação do ambiente, instalação e configuração do Redis
+## Tutorial
+
+### Preparação do ambiente para a app (Opcional)
+A preparação abaixo não é crucial para o funcionamento do Redis. O intuito da app é demonstrar a comunicação com o Redis Cluster e seu comportamento durante adição e remoção de nós, e redistribuição das chaves, por exemplo.
+
 ```bash
-# Para instalação do Redis, consulte: https://github.com/tavaresdb/db/blob/main/redis/instala%C3%A7%C3%A3o/install.sh
-# A instalação do ruby não é crucial para o Redis. O tutorial aborda tal instalação, pois um script ruby será utilizado para avaliar o comportamento de uma possível app durante o processo de resharding/rebalanceamento. Caso não queira instalar esses componentes, não há necessidade de instalá-los. Inclusive em ambiente produtivo é recomendável termos servidores dedicados à banco de dados, porém pra finalidade desse tutorial tudo é concetrado em um único servidor.
 apt install ruby-full
 gem install redis
 mkdir cluster-test
@@ -75,6 +77,11 @@ else
 end
 ..
 :wq
+```
+
+### Preparação do ambiente para o banco de dados
+```bash
+# Para instalação do Redis, consulte: https://github.com/tavaresdb/db/blob/main/redis/instala%C3%A7%C3%A3o/install.sh
 vi redis.conf
 ..
 port 7000
@@ -165,16 +172,24 @@ ps aux | grep redis
 ```
 
 ### Criação do cluster
+Para fins didáticos será adicionada apenas uma réplica, entretanto em produção considere ter duas réplicas para cada shard, conforme mencionado anteriormente, para evitar split-brain.
+
 ```bash
 redis-cli --cluster create 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 127.0.0.1:7003 127.0.0.1:7004 127.0.0.1:7005 --cluster-replicas 1
-ruby ./redis-rb-cluster-master/example.rb
 ```
 
 ![](img/07.png)
+
+### Execução da app
+```bash
+ruby ./redis-rb-cluster-master/example.rb
+```
+
 ![](img/08.png)
 
-Obs.: Uma vez que iniciou-se a execução do script ruby, aberta nova sessão para interação com o client do Redis.
+Obs.: Dedique a execução da app em uma sessão diferente do banco de dados.
 
+### Checagem do cluster
 ```bash
 redis-cli --cluster check 127.0.0.1:7000
 ```
@@ -258,9 +273,12 @@ redis-cli --cluster check 127.0.0.1:7000
 
 ![](img/24.png)
 
-Obs.: Todas as operações acima podem ser realizadas sem interrupção do serviço Redis, no entanto o aplicativo deve usar os clientes/drivers/conectores compatíveis do Redis para que a solicitação possa ser redirecionada para os shards corretos enquanto o rebalanceamento ou o resharding estiver acontecendo.
+### Notas
+Todas as operações acima podem ser realizadas sem interrupção do serviço Redis, no entanto o aplicativo deve usar os clientes/drivers/conectores compatíveis do Redis para que a solicitação possa ser redirecionada para os shards corretos enquanto o rebalanceamento ou o resharding estiver acontecendo.
 
-Durante a POC foi utilizada a app example.rb, entretanto a consistency-test.rb tende a ser mais interessante, pois é um verificador de consistência simples e é capaz de dizer se o cluster perdeu alguma gravação ou se aceitou uma escrita pela qual não temos reconhecimento. Abaixo, uma amostra:
+Obs.: Quando usado o redis-cli para se conectar à um shard, essa conexão acessará apenas esse shard e não poderá acessar dados de outros shards. Ao tentar acessar as chaves do shard errado, será apresentado um erro MOVED. Existe um truque que podemos usar com o redis-cli para não precisar abrir conexões para todos os shards, onde o utilitário fará o trabalho de conexão e reconexão para nós. É o modo de suporte do cluster redis-cli, acionado pela opção -c (Por exemplo, redis-cli -p 7000 -c). No modo cluster, se o client receber uma resposta de erro '(error) MOVED XXXX 127.0.0.1:7002' do shard ao qual está conectado, ele simplesmente se reconectará ao endereço retornado na resposta de erro, neste caso 127.0.0.1:7002.
+
+Durante o tutorial foi utilizada a app example.rb, entretanto a consistency-test.rb tende a ser mais interessante, pois é um verificador de consistência simples e é capaz de dizer se o cluster perdeu alguma gravação ou se aceitou uma escrita pela qual não temos reconhecimento. Abaixo, uma amostra:
 
 ![](img/25.png)
 
