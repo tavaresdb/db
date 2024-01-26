@@ -283,8 +283,8 @@ Durante o tutorial foi utilizada a app example.rb, entretanto a consistency-test
 ![](img/25.png)
 
 ### Referências:
-https://developer.redis.com/operate/redis-at-scale
-https://redis.io/docs/reference/cluster-spec/
-https://redis.io/docs/management/scaling/
-https://github.com/antirez/redis-rb-cluster/tree/master/
-https://severalnines.com/blog/hash-slot-resharding-and-rebalancing-redis-cluster/
+- https://developer.redis.com/operate/redis-at-scale
+- https://redis.io/docs/reference/cluster-spec/
+- https://redis.io/docs/management/scaling/
+- https://github.com/antirez/redis-rb-cluster/tree/master/
+- https://severalnines.com/blog/hash-slot-resharding-and-rebalancing-redis-cluster/
