@@ -3,16 +3,18 @@
 - Append-only file (AOF).
 
 No arquivo redis.conf, ajuste os seguintes parâmetros caso opte por snapshot:
-
+```
 dbfilename my_backup_file.rdb
 dir /backup
 save 60 1000
+```
 
 No arquivo redis.conf, ajuste os seguintes parâmetros caso opte por AOF:
-
+```
 appendonly yes
 appendfilename "my_aof_file.aof"
 appendfsync [always | everysec | no]
+```
 
 Observações:
 - A persistência de dados pode afetar o desempenho;
