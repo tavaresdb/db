@@ -1,4 +1,4 @@
-// Obtém as estatísticas de todas as tabelas. É possível obter o totalSize através da soma entre storageSize e totalIndexSize.
+// Obtém as estatísticas de todas as coleções. É possível obter o totalSize através da soma entre storageSize e totalIndexSize.
 // Ref.: https://studio3t.com/whats-new/how-to-get-mongodb-statistics-for-all-collections-studio3t_ama/
 
 var dbs = db.getMongo().getDBNames();
