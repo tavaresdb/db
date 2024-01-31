@@ -23,5 +23,5 @@ Observações:
 - Os possíveis valores para sincronização são os seguintes: always (Sincroniza a cada gravação, sendo a mais segura; O cliente receberá a confirmação somente após ter sido gravado no arquivo AOF), everysec (Política padrão, sincronizando as gravações a cada segundo) e no (O Redis registrará no descritor de arquivos, porém não forçará o SO a liberar os dados no disco. O Linux costuma despejar os dados para o disco a cada 30 segundos);
 - Caso opte pelo AOF, à medida que os arquivos AOF aumentam de tamanho, o servidor Redis reescreve periodicamente em um formato compactado. Esse arquivo compactado contém o conjunto mínimo de comandos necessários para reconstruir o conjunto de dados no momento em que o arquivo foi criado.
 
-# Referência:
+## Referência:
 https://redis.io/docs/management/persistence/
