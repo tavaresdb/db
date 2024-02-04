@@ -3,28 +3,29 @@ SHOW GLOBAL STATUS;
 SHOW ENGINE INNODB STATUS;
 
 -- Monitoramento de conexões
-SHOW FULL PROCESSLIST \G;
-SELECT * FROM information_schema.processlist ORDER BY db, time DESC;
-SELECT * FROM performance_schema.processlist ORDER BY db, time DESC;
+SHOW FULL PROCESSLIST;
 
 SHOW VARIABLES LIKE 'max_connections';
 SHOW GLOBAL STATUS LIKE 'Threads_connected';
 SHOW GLOBAL STATUS LIKE 'Threads_running';
 
--- Encerrando conexões
+-- Encerramento conexões
 KILL processlist_id;
 
 SELECT CONCAT('KILL ', id, ';')
-  FROM information_schema.processlist
+  FROM performance_schema.processlist
  WHERE user = 'user_name';
 
 -- Fornece informações sobre cada transação atualmente em execução dentro do InnoDB, incluindo se a transação está aguardando um bloqueio, quando a transação foi iniciada e a instrução SQL que a transação está executando, se houver
-SELECT * FROM information_schema.innodb_trx ORDER BY trx_started;
+SELECT *
+  FROM information_schema.innodb_trx
+ ORDER
+    BY trx_started;
 
 SELECT b.user, b.command, b.time, b.state, b.info, a.*
   FROM information_schema.innodb_trx a
  INNER
-  JOIN information_schema.processlist b
+  JOIN performance_schema.processlist b
     ON a.trx_mysql_thread_id = b.id
  ORDER
     BY a.trx_started;
@@ -48,7 +49,7 @@ SELECT trx.trx_mysql_thread_id,
        lock_waits.blocking_lock_id
   FROM information_schema.innodb_locks locks,
        information_schema.innodb_trx trx,
-       information_schema.processlist processlist,
+       performance_schema.processlist processlist,
        information_schema.innodb_lock_waits lock_waits
  WHERE locks.lock_trx_id = trx.trx_id
    AND trx.trx_mysql_thread_id = processlist.id;
@@ -87,7 +88,7 @@ SELECT *
   FROM sys.x$statement_analysis an
  WHERE an.last_seen >= '2022-04-08 08:00:00'
  ORDER
-    BY last_seen desc, total_latency desc;
+    BY last_seen DESC, total_latency DESC;
 
 -- Avaliação do tamanho de tabela
 SELECT table_schema AS 'Schema', table_name AS 'Table', ROUND((data_length + index_length) / 1024 / 1024) AS 'Size (MB)'
@@ -106,7 +107,8 @@ SELECT CONCAT(CONCAT(table_schema, '.'), table_name), data_free
 OPTIMIZE TABLE schema.tabname;
 
 -- Identificação de índices ineficientes
-SELECT * FROM sys.schema_unused_indexes;
+SELECT *
+  FROM sys.schema_unused_indexes;
 
 -- Avaliação do plano de execução
 EXPLAIN SELECT * FROM actor;
