@@ -89,6 +89,7 @@ cluster-enabled yes
 cluster-config-file nodes.conf
 cluster-node-timeout 5000
 appendonly yes
+appendfilename "persisted.aof"
 :wq
 mkdir 7000 7001 7002 7003 7004 7005 7006 7007 7008 7009
 cp redis.conf 7000/
@@ -170,6 +171,8 @@ redis-server redis.conf --daemonize yes
 cd ..
 ps aux | grep redis
 ```
+
+Obs.: No parâmetro port especificamos a porta na qual o servidor será executado. No parâmetro cluster-enabled especificamos o valor yes para habilitar o uso do Redis Cluster. No parâmetro cluster-config-file especificamos o nome do arquivo onde o nó persistirá a configuração do cluster (Sempre que houver uma alteração no estado do cluster, por exemplo, tais modificações serão salvas no arquivo). No parâmetro cluster-node-timeout especificamos em o tempo em ms que um nó pode ficar indisponível, sem ser considerada uma falha. Se o nó master não ficar acessível dentro do período informado, ocorrerá o failover. No parâmetro appendonly ativamos a [persistência de dados](https://github.com/tavaresdb/db/blob/main/redis/persist%C3%AAncia%20de%20dados/persisted.md) e no parâmetro appendfilename definimos o nome do arquivo AOF. Nesse tutorial não definimos explicitamente o parâmetro cluster-require-full-coverage, mas é importante ter ciência sobre o seu significado. O valor padrão é yes, ou seja, se um shard falhar, nós master e réplica, todo o cluster ficará indisponível. Se definido como no, o cluster fica disponível (Desempenho pode ser afetado), mas de forma que todas as chaves roteadas para o shard com falha/disponível resultem em um erro.
 
 ### Criação do cluster
 Para fins didáticos será adicionada apenas uma réplica, entretanto em produção considere ter duas réplicas para cada shard, conforme mencionado anteriormente, para evitar split-brain.

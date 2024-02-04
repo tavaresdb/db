@@ -9,7 +9,7 @@ Após ter configurado a [replicação](https://github.com/tavaresdb/db/blob/main
 
 > Terminal 1
 ```bash
-# O comando abaixo deverá retornar o caminho ~/replica, supondo que esse foi o último caminho navegável durante a configuração da [replicação](https://github.com/tavaresdb/db/blob/main/redis/alta%20disponibilidade/replication.md)
+# O comando abaixo deverá retornar o caminho ~/replica, supondo que esse foi o último caminho navegável durante a configuração da replicação (https://github.com/tavaresdb/db/blob/main/redis/alta%20disponibilidade/replication.md)
 pwd
 touch sentinel2.conf
 vi sentinel2.conf
