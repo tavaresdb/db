@@ -6,6 +6,7 @@
 - slowlog-max-len: Define o tamanho do log lento, ou seja, o mais antigo é removido da fila.
 
 # Configurações do SO
+```bash
 vm.swappiness=0                         # turn off swapping
 net.ipv4.tcp_sack=1                     # enable selective acknowledgements
 net.ipv4.tcp_timestamps=1               # needed for selective acknowledgements
@@ -17,10 +18,13 @@ net.ipv4.tcp_max_syn_backlog=NUMBER     # backlog setting
 net.core.somaxconn=NUMBER               # up the number of connections per port
 net.core.rmem_max=NUMBER                # up the receive buffer size
 net.core.wmem_max=NUMBER                # up the buffer size for all connections
+```
 
 Obs.: Caso o número de conexões estimado seja alto, os parâmetros acima devem ser avaliados.
 
+```bash
 echo 'never' > /sys/kernel/mm/transparent_hugepage/enabled
+```
 
 ### Referência:
 https://developer.redis.com/operate/redis-at-scale/talking-to-redis/initial-tuning

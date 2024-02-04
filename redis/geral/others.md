@@ -80,6 +80,7 @@ HGETALL "movie"
 ```
 
 Obs. 1: O comando HGETALL pode ser um problema caso o hash contenha muitos campos. Ele pode impactar o Redis devido a transferência desses dados através da rede. Uma boa alternativa é o comando HSCAN.
+
 Obs. 2: É possível recuperar apenas os nomes de campo ou valores de campo de um hash com os comandos HKEYS e HVALS.
 
 # Set

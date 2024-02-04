@@ -5,7 +5,7 @@
 PING
 ```
 
-## Lista as conexões client
+## Lista de conexões
 ```bash
 CLIENT LIST
 ```
@@ -52,6 +52,7 @@ https://redis.io/commands/info/
 INFO
 INFO memory
 INFO cpu
+...
 ```
 
 ## Retorna o número de chaves existentes no banco de dados
@@ -85,12 +86,12 @@ redis-cli INFO stats | grep keyspace
 
 Essa opção varrerá o conjunto de dados em busca de chaves grandes e fornecerá informações sobre elas:
 ```bash
-redis-cli —bigkeys
+redis-cli --bigkeys
 ```
 
 Além de relatar as maiores chaves, essa opção relatará o tamanho médio:
 ```bash
-redis-cli —memkeys
+redis-cli --memkeys
 ```
 
 Logfile:
