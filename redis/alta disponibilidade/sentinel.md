@@ -236,7 +236,7 @@ O comando acima fornece o endereço do atual primário.
 not connected>
 ```
 
-Obs.: O comando SENTINEL FAILOVER <nome do master> força um failover como se o master não estivesse acessível, e sem pedir concordância aos outros sentinels (porém uma nova versão da configuração será publicada para que os outros sentinels atualizem suas configurações).
+Obs.: O comando acima simula a falha do atual primário e posteriormente um novo primário será eleito. Uma alternativa seria a emissão do comando SENTINEL FAILOVER <nome do master>, forçando o failover mesmo sem a concordância entre outros sentinels (Uma nova versão da configuração será publicada para que os outros sentinels atualizem suas configurações).
 
 > Terminal 3
 ```bash

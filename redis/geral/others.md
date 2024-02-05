@@ -69,7 +69,7 @@ HINCRBY "movie" "watchers" 3
 HMGET "movie" "title" "rating"
 ```
 
-## Remove o campo de um hash
+## Remoção do campo de um hash
 ```bash
 HDEL "movie" "watchers"
 ```
@@ -176,10 +176,14 @@ BITCOUNT "total_users"
 ```
 
 # HyperLogLogs
-Conceitualmente um HyperLogLog é um algoritmo que usa randomização para fornecer uma aproximação muito boa do número de elementos exclusivos que existem em um conjunto (No Redis, o erro padrão é de 0,81).
+Conceitualmente um HyperLogLog é um algoritmo que usa randomização para fornecer uma aproximação muito boa do número de elementos exclusivos que existem em um conjunto (No Redis, o erro padrão é de 0,81%).
 O mais interessante é que é executado em O(1), tempo constante, e usa uma quantidade muito pequena de memória (Até 12kB de memória por chave).
 
-Casos de uso: Contagem do número de usuários únicos que visitaram um site, do número de termos distintos que foram pesquisados no site em uma data ou hora específica, do número de hashtags distintas que foram usadas por um usuário e o número de palavras distintas que apareceram em um livro.
+Casos de uso:
+- Contagem do número de usuários únicos que visitaram um site;
+- Contagem do número de termos distintos que foram pesquisados no site em uma data ou hora específica;
+- Contagem do número de hashtags distintas que foram usadas por um usuário;
+- Contagem do número de palavras distintas que apareceram em um livro.
 
 ## Exemplos
 - Adição de strings ao HyperLogLog. O PFADD retorna 1 se a cardinalidade foi alterada e 0 se permanece a mesma
@@ -210,7 +214,7 @@ SET "b" 2
 EXEC
 ```
 
-Obs.: O comando MULTI inicia a transação, os demais comandos dentro do bloco serão enfileirados e somente o último estágio, EXEC, finalizará a transação. Em casos de reversão da transação, o comando DISCARD pode ser executado.
+O comando MULTI inicia a transação, os demais comandos dentro do bloco serão enfileirados e somente o último estágio, EXEC, finalizará a transação. Em casos de reversão da transação, o comando DISCARD pode ser executado.
 
 # Outros
 

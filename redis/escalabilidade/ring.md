@@ -53,9 +53,8 @@ Como estudo de caso, abordaremos aqui a implementação via proxy. O [twemproxy]
 
 > Terminal 1
 ```bash
-apt update
-apt install linux-libc-dev gcc make net-tools
 # Para instalação do Redis, consulte: https://github.com/tavaresdb/db/blob/main/redis/instala%C3%A7%C3%A3o/install.sh
+apt install linux-libc-dev gcc make net-tools
 redis-server --port 6666 --daemonize yes
 redis-server --port 7777 --daemonize yes
 redis-server --port 8888 --daemonize yes
