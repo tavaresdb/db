@@ -21,7 +21,7 @@ for (adb of dbs) {
     }
 }
 
-// Lista de todos os índices de um banco de dados, desconsiderando coleções com sufixo versions.
+// Lista de todos os índices de um banco de dados, desconsiderando coleções com sufixo especificado.
 
 var dbName = "db";
 
