@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# https://redis.io/docs/getting-started/installation/install-redis-on-linux/
-
 apt-get update
 apt-get install lsb-release curl gpg -y
 curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
