@@ -81,7 +81,7 @@ end
 
 ### Preparação do ambiente para o banco de dados
 ```bash
-# Para instalação do Redis, consulte: https://github.com/tavaresdb/db/blob/main/redis/instala%C3%A7%C3%A3o/install_redis.sh
+# Para instalação do Redis, consulte: https://github.com/tavaresdb/db/blob/main/redis/install/install_redis.sh
 vi redis.conf
 ..
 port 7000
