@@ -130,6 +130,6 @@ A implementação acima torna o twemproxy um ponto único de falha. Para mudar t
 
 ![](img/06.png)
 
-### Referência:
+## Referência:
 
 Livro Redis Essentials: Harness the power of Redis to integrate and manage your projects efficiently, por Maxwell Dayvson Da Silva e Hugo Lopes Tavares. Páginas 148-168.

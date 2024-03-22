@@ -26,5 +26,5 @@ Obs.: Caso o número de conexões estimado seja alto, os parâmetros acima devem
 echo 'never' > /sys/kernel/mm/transparent_hugepage/enabled
 ```
 
-### Referência:
+# Referência:
 https://developer.redis.com/operate/redis-at-scale/talking-to-redis/initial-tuning

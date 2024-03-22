@@ -253,6 +253,6 @@ FLUSHALL
 WAIT 1 10
 ```
 
-### Referência:
+## Referência:
 
 Livro Redis Essentials: Harness the power of Redis to integrate and manage your projects efficiently, por Maxwell Dayvson Da Silva e Hugo Lopes Tavares. Páginas 14-15; 21-22; 25; 27; 33; 41; 47-48; 81.
