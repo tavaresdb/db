@@ -5,11 +5,11 @@ A adoção do sentinel permitirá contar com alta disponibilidade, já que o fai
 ![](img/02.png)
 
 ## Tutorial
-Após ter configurado a [replicação](https://github.com/tavaresdb/db/blob/main/redis/alta%20disponibilidade/replication.md), prossiga com os passos abaixo para adoção do sentinel:
+Após ter configurado a [replicação](https://github.com/tavaresdb/db/blob/main/redis/high_availability/replication.md), prossiga com os passos abaixo para adoção do sentinel:
 
 > Terminal 1
 ```bash
-# O comando abaixo deverá retornar o caminho ~/replica, supondo que esse foi o último caminho navegável durante a configuração da replicação (https://github.com/tavaresdb/db/blob/main/redis/alta%20disponibilidade/replication.md)
+# O comando abaixo deverá retornar o caminho ~/replica, supondo que esse foi o último caminho navegável durante a configuração da replicação (https://github.com/tavaresdb/db/blob/main/redis/high_availability/replication.md)
 pwd
 touch sentinel2.conf
 vi sentinel2.conf

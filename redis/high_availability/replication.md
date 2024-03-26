@@ -21,7 +21,7 @@ appendfilename "primary.aof"
 :wq
 ```
 
-No parâmetro port especificamos a porta na qual o servidor será executado. No parâmetro requirepass especificamos uma senha. No parâmetro masterauth especificamos a senha AUTH da instância primária caso esta instância se torne uma réplica. No parâmetro appendonly ativamos a [persistência de dados](https://github.com/tavaresdb/db/blob/main/redis/persist%C3%AAncia%20de%20dados/persisted.md) e no parâmetro appendfilename definimos o nome do arquivo AOF.
+No parâmetro port especificamos a porta na qual o servidor será executado. No parâmetro requirepass especificamos uma senha. No parâmetro masterauth especificamos a senha AUTH da instância primária caso esta instância se torne uma réplica. No parâmetro appendonly ativamos a [persistência de dados](https://github.com/tavaresdb/db/blob/main/redis/persistence/persistence.md) e no parâmetro appendfilename definimos o nome do arquivo AOF.
 
 ```bash
 redis-server primary.conf --daemonize yes
