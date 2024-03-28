@@ -1,5 +1,4 @@
-**Redis**
-
+# Redis
 Nessa seção abordaremos os seguintes temas:
 
 - Instalação e configuração;
