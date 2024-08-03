@@ -206,6 +206,10 @@ chmod 400 /etc/ssl/clients/*
 redis-cli --tls --cacert /usr/local/share/ca-certificates/ca.crt --cert /etc/ssl/clients/client.crt --key /etc/ssl/clients/client.key
 ```
 
+## Considerações
+- Ao adotar ACLs em um ambiente com replicação, certifique-se de configurar o parâmetro masteruser;
+- Ao adotar ACLs em conjunto com Sentinel, algumas diretivas deverão ser seguidas, conforme mencionado na [documentação](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/#sentinel-and-redis-authentication).
+
 ## Referências:
 - https://github.com/redislabs-training/ru330
 - https://redis.io/docs/management/security/acl/
