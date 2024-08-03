@@ -1,0 +1,89 @@
+apiVersion: databases.spotahome.com/v1
+kind: RedisFailover
+metadata:
+  name: my-cluster
+spec:
+  sentinel:
+    replicas: 3
+    image: redis:6.2-alpine
+    customConfig:
+      - "down-after-milliseconds 2000"
+      - "failover-timeout 3000"
+    topologySpreadConstraints:
+    - labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: sentinel
+      maxSkew: 1
+      topologyKey: "topology.kubernetes.io/zone"
+      whenUnsatisfiable: DoNotSchedule
+    - labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: sentinel
+      maxSkew: 1
+      topologyKey: "kubernetes.io/hostname"
+      whenUnsatisfiable: DoNotSchedule
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 250m
+        memory: 512Mi
+    exporter:
+      enabled: true
+      image: leominov/redis_sentinel_exporter:1.7.1
+  redis:
+    replicas: 3
+    image: redis:6.2-alpine
+    customConfig:
+      - "maxclients 100"
+      - "hz 50"
+      - "timeout 60"
+      - "tcp-keepalive 60"
+      - "client-output-buffer-limit normal 0 0 0"
+      - "client-output-buffer-limit slave 1000000000 1000000000 0"
+      - "client-output-buffer-limit pubsub 33554432 8388608 60"
+    topologySpreadConstraints:
+    - labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: sentinel
+      maxSkew: 1
+      topologyKey: "topology.kubernetes.io/zone"
+      whenUnsatisfiable: DoNotSchedule
+    - labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: sentinel
+      maxSkew: 1
+      topologyKey: "kubernetes.io/hostname"
+      whenUnsatisfiable: DoNotSchedule
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1024Mi
+    storage:
+      keepAfterDeletion: true
+      persistentVolumeClaim:
+        metadata:
+          name: redisfailover-persistent-data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
+          storageClassName: premium-rwo
+    exporter: 
+      enabled: true
+      image: oliver006/redis_exporter:v1.62.0
+      args:
+        - --include-system-metrics
+        - --web.telemetry-path
+        - /metrics
+      env:
+        - name: REDIS_EXPORTER_LOG_FORMAT
+          value: txt
+  auth:
+    secretPath: my-user
