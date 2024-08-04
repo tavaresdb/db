@@ -228,6 +228,7 @@ exit
 ```
 
 7. Atualize a página e observe que os gráficos 'Comandos por segundo' e 'Chaves' foram atualizados para mostrar o estado real do banco de dados.
+
 ![](img/01.png)
 
 ![](img/02.png)
