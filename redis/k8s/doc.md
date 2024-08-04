@@ -76,11 +76,21 @@ helm repo add redis-operator https://spotahome.github.io/redis-operator
 helm repo update
 
 helm -n ${NAMESPACE} install redis-operator redis-operator/redis-operator --version 3.2.9
+NAME: redis-operator
+LAST DEPLOYED: Sun Aug  4 03:40:00 2024
+NAMESPACE: ns-redis
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
 helm -n ${NAMESPACE} ls
+NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
+redis-operator  ns-redis        1               2024-08-04 03:40:00.911902026 +0000 UTC deployed        redis-operator-3.2.9    1.2.4      
+
 helm -n ${NAMESPACE} get manifest redis-operator
 helm -n ${NAMESPACE} get values redis-operator/redis-operator
 
-kubectl -n ${NAMESPACE} get all --watch
+kubectl get all
 ```
 
 # Implantação do Redis Sentinel
@@ -102,14 +112,52 @@ kubectl create secret generic my-user \
 kubectl apply -f manifests/redis-spotahome/my-cluster.yaml
 
 kubectl wait pods -l redisfailovers.databases.spotahome.com/name=my-cluster --for condition=Ready --timeout=300s
+pod/rfr-my-cluster-0 condition met
+pod/rfr-my-cluster-1 condition met
+pod/rfr-my-cluster-2 condition met
+pod/rfs-my-cluster-7d976dcbcb-bgsts condition met
+pod/rfs-my-cluster-7d976dcbcb-lqql6 condition met
+pod/rfs-my-cluster-7d976dcbcb-q66md condition met
 
-kubectl get pod,svc,statefulset,deploy,pdb
+kubectl get pod,svc,sts,deploy,pdb
+NAME                                  READY   STATUS    RESTARTS   AGE
+pod/redis-operator-77c795fc5f-nckpg   1/1     Running   0          10m
+pod/rfr-my-cluster-0                  2/2     Running   0          8m44s
+pod/rfr-my-cluster-1                  2/2     Running   0          8m44s
+pod/rfr-my-cluster-2                  2/2     Running   0          8m44s
+pod/rfs-my-cluster-7d976dcbcb-bgsts   2/2     Running   0          8m44s
+pod/rfs-my-cluster-7d976dcbcb-lqql6   2/2     Running   0          8m44s
+pod/rfs-my-cluster-7d976dcbcb-q66md   2/2     Running   0          8m44s
 
---[Opcional]
-kubectl get pods -l "app=redis" -o jsonpath="{.items[*].spec.nodeName}"
-kubectl get node [NODE1_NAME] -o jsonpath="{.metadata.labels['topology\.kubernetes\.io/zone']}"
-kubectl get node [NODE2_NAME] -o jsonpath="{.metadata.labels['topology\.kubernetes\.io/zone']}"
-kubectl get node [NODE3_NAME] -o jsonpath="{.metadata.labels['topology\.kubernetes\.io/zone']}"
+NAME                     TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)     AGE
+service/redis-operator   ClusterIP   10.52.9.86    <none>        9710/TCP    10m
+redis-my-cluster         ClusterIP   10.52.4.231   <none>        6379/TCP    8m45s
+service/rfr-my-cluster   ClusterIP   None          <none>        9121/TCP    8m45s
+service/rfs-my-cluster   ClusterIP   10.52.7.230   <none>        26379/TCP   8m45s
+
+NAME                              READY   AGE
+statefulset.apps/rfr-my-cluster   3/3     8m44s
+
+NAME                             READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/redis-operator   1/1     1            1           10m
+deployment.apps/rfs-my-cluster   3/3     3            3           8m44s
+
+NAME                                        MIN AVAILABLE   MAX UNAVAILABLE   ALLOWED DISRUPTIONS   AGE
+poddisruptionbudget.policy/rfr-my-cluster   2               N/A               1                     8m44s
+poddisruptionbudget.policy/rfs-my-cluster   2               N/A               1                     8m44s
+
+kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.labels.topology\.kubernetes\.io/zone}{"\n"}{end}'    
+gke-redis-cluster-default-node-pool-1891411a-mhwb       us-central1-f
+gke-redis-cluster-default-node-pool-aca6b2b2-jrnt       us-central1-a
+gke-redis-cluster-default-node-pool-f785f43a-jm57       us-central1-b
+
+kubectl get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.nodeName}{"\n"}{end}'
+rfr-my-cluster-0        gke-redis-cluster-default-node-pool-1891411a-mhwb
+rfr-my-cluster-1        gke-redis-cluster-default-node-pool-f785f43a-jm57
+rfr-my-cluster-2        gke-redis-cluster-default-node-pool-aca6b2b2-jrnt
+rfs-my-cluster-7d976dcbcb-bgsts gke-redis-cluster-default-node-pool-1891411a-mhwb
+rfs-my-cluster-7d976dcbcb-lqql6 gke-redis-cluster-default-node-pool-f785f43a-jm57
+rfs-my-cluster-7d976dcbcb-q66md gke-redis-cluster-default-node-pool-aca6b2b2-jrnt
 ```
 
 O operator criará os seguintes recursos:
@@ -122,6 +170,8 @@ O operator criará os seguintes recursos:
 
 • Dois PodDisruptionBudgets, garantindo no mínimo duas réplicas disponíveis para a consistência do cluster.
 
+• O serviço redis-my-cluster, que tem como destino o nó líder do cluster do Redis.
+
 • O serviço rfr-my-cluster, que expõe métricas do Redis.
 
 • O serviço rfs-my-cluster, que permite que os clientes se conectem ao cluster usando Sentinels. O suporte ao Sentinel é necessário para bibliotecas de cliente.
@@ -130,7 +180,7 @@ O operator criará os seguintes recursos:
 ```bash
 kubectl apply -f manifests/redis-spotahome/client-pod.yaml
 kubectl wait pod redis-client --for=condition=Ready --timeout=300s
-kubectl exec -it redis-client -- /bin/bash
+kubectl exec -it redis-client -- /bin/sh
 
 redis-cli -h redis-my-cluster -a $PASS --no-auth-warning SET my-key "testvalue"
 redis-cli -h redis-my-cluster -a $PASS --no-auth-warning GET my-key
@@ -167,20 +217,22 @@ kubectl apply -f manifests/redis-spotahome/pod-monitoring.yaml
 
 5. Conecte-se ao pod cliente.
 ```bash
-kubectl exec -it redis-client -- /bin/bash
+kubectl exec -it redis-client -- /bin/sh
 ```
 
 6. Crie novas chaves via redis-cli.
 ```bash
-for i in {1..50}; do \
-  redis-cli -h redis-my-cluster -a $PASS \
-  --no-auth-warning SET mykey-$i "myvalue-$i"; \
-done
+seq 1 10000 | xargs -I{} redis-cli -h redis-my-cluster -a $PASS --no-auth-warning SET mykey-{} "myvalue-{}"
 
 exit
 ```
 
-7. AtuaSlize a página e observe que os gráficos 'Comandos por segundo' e 'Chaves' foram atualizados para mostrar o estado real do banco de dados.
+7. Atualize a página e observe que os gráficos 'Comandos por segundo' e 'Chaves' foram atualizados para mostrar o estado real do banco de dados.
+![](img/01.png)
+
+![](img/02.png)
+
+![](img/03.png)
 
 # Exclusão dos recursos
 ```bash

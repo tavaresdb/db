@@ -87,3 +87,19 @@ spec:
           value: txt
   auth:
     secretPath: my-user
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-my-cluster
+spec:
+  ports:
+  - name: redis
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app.kubernetes.io/component: redis
+    app.kubernetes.io/name: my-cluster
+    redisfailovers-role: master
+  type: ClusterIP
