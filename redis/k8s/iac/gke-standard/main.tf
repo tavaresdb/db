@@ -41,7 +41,7 @@ module "redis_cluster" {
       max_count       = 2
       max_surge       = 1
       max_unavailable = 0
-      machine_type    = "e2-medium"
+      machine_type    = "e2-standard-4"
       auto_repair     = true
     }
   ]

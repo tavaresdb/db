@@ -74,12 +74,9 @@ kubectl config set-context --current --namespace=${NAMESPACE}
 ```bash
 helm repo add redis-operator https://spotahome.github.io/redis-operator
 helm repo update
-helm -n ${NAMESPACE} install redis-operator redis-operator/redis-operator --version 3.3.0
-helm -n ${NAMESPACE} ls
-```
 
-## [Opcional] Avaliação do manifesto recém instalado e valores definidos no cluster
-```bash
+helm -n ${NAMESPACE} install redis-operator redis-operator/redis-operator --version 3.2.9
+helm -n ${NAMESPACE} ls
 helm -n ${NAMESPACE} get manifest redis-operator
 helm -n ${NAMESPACE} get values redis-operator/redis-operator
 
@@ -103,7 +100,9 @@ kubectl create secret generic my-user \
     --from-literal=password="$PASSWORD"
 
 kubectl apply -f manifests/redis-spotahome/my-cluster.yaml
+
 kubectl wait pods -l redisfailovers.databases.spotahome.com/name=my-cluster --for condition=Ready --timeout=300s
+
 kubectl get pod,svc,statefulset,deploy,pdb
 
 --[Opcional]
@@ -189,7 +188,7 @@ terraform -chdir=iac/gke-standard destroy -var project_id=${PROJECT_ID} \
   -var region=${REGION} \
   -var cluster_prefix=${KUBERNETES_CLUSTER_PREFIX}
 
-export disk_list=$(gcloud compute disks list --filter="-users:* AND labels.name=${KUBERNETES_CLUSTER_PREFIX}-cluster" --format "value[separator=|](name,zone)")
+export disk_list=$(gcloud compute disks list --filter="-users:* AND labels.goog-k8s-cluster-name=${KUBERNETES_CLUSTER_PREFIX}-cluster" --format "value[separator=|](name,zone)")
 
 for i in $disk_list; do
   disk_name=$(echo $i| cut -d'|' -f1)
