@@ -7,7 +7,7 @@ O diagrama a seguir mostra como o Redis será executado em vários nós e zonas 
 
 ![](img/gke-spotahome-sentinel.svg)
 
-Para controlar como o GKE implanta o StatefulSet em nós e zonas, foi definida [topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/) (distribuição de topologia) na especificação dos pods.
+Para controlar como o GKE implanta o StatefulSet em nós e zonas, foi definida [topology spread constraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/) na especificação dos pods.
 
 Importante: O tutorial não aborda todas as questões relacionadas a ambiente produtivo. Sendo assim, pense criticamente antes de cogitar a adoção desse procedimento.
 
@@ -22,7 +22,7 @@ export KUBERNETES_CLUSTER_PREFIX=redis
 export REGION=us-central1
 
 git clone https://github.com/tavaresdb/db
-cd redis/k8s
+cd db/redis/k8s
 ```
 
 # Criação da infraestrutura do cluster

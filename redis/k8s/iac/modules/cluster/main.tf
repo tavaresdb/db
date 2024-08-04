@@ -21,6 +21,7 @@ module "redis_cluster" {
   project_id               = var.project_id
   name                     = "${var.cluster_prefix}-cluster"
   regional                 = true
+  remove_default_node_pool = true
   region                   = var.region
   network                  = var.network
   subnetwork               = var.subnetwork
