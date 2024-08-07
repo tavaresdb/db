@@ -433,13 +433,13 @@ NAME                              READY   STATUS              RESTARTS   AGE
 rfr-my-cluster-0                  2/2     Running             0          42m
 rfr-my-cluster-1                  2/2     Running             0          42m
 rfr-my-cluster-2                  2/2     Running             0          42m
-rfs-my-cluster-7d976dcbcb-7sz2w   2/2     Running             0          42m
-rfs-my-cluster-7d976dcbcb-9v4dp   2/2     Running             0          42m
-rfs-my-cluster-7d976dcbcb-bsg2m   2/2     Running             0          42m
+rfs-my-cluster-7d976dcbcb-bgsts   2/2     Running             0          42m
+rfs-my-cluster-7d976dcbcb-lqql6   2/2     Running             0          42m
+rfs-my-cluster-7d976dcbcb-q66md   2/2     Running             0          42m
 ...
-rfs-my-cluster-7d976dcbcb-9v4dp   2/2     Terminating         0          43m
-rfs-my-cluster-7d976dcbcb-7sz2w   2/2     Terminating         0          43m
-rfs-my-cluster-7d976dcbcb-bsg2m   2/2     Terminating         0          43m
+rfs-my-cluster-7d976dcbcb-lqql6   2/2     Terminating         0          43m
+rfs-my-cluster-7d976dcbcb-bgsts   2/2     Terminating         0          43m
+rfs-my-cluster-7d976dcbcb-q66md   2/2     Terminating         0          43m
 rfr-my-cluster-0                  2/2     Terminating         0          43m
 rfr-my-cluster-2                  2/2     Terminating         0          43m
 rfr-my-cluster-1                  2/2     Terminating         0          43m
