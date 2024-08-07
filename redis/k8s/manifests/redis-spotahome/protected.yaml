@@ -1,0 +1,19 @@
+apiVersion: gkebackup.gke.io/v1
+kind: ProtectedApplication
+metadata:
+  name: protected-application-redis
+spec:
+  resourceSelection:
+    type: Selector
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: my-cluster
+  components:
+    - name: my-cluster
+      resourceKind: StatefulSet
+      resourceNames:
+        - rfr-my-cluster
+      strategy:
+        type: BackupOneRestoreAll
+        backupOneRestoreAll:
+          backupTargetName: rfr-my-cluster
