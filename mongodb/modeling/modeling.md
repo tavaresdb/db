@@ -1,5 +1,5 @@
 # Modelagem de dados
-Regra de ouro: [i]"Dados que são acessados juntos, devem permanecer juntos".
+Regra de ouro: *"Dados que são acessados juntos, devem permanecer juntos"*.
 
 ## Metodologia ref. modelagem de dados
 ### Workload
@@ -18,7 +18,6 @@ Regra de ouro: [i]"Dados que são acessados juntos, devem permanecer juntos".
 
 - N:N - Normalmente duas coleções compartilham um atributo em comum, sendo este atributo um array de referências (Isso pode ser feito do lado 'pai' ou 'filho'). O [vídeo](https://fast.wistia.net/embed/iframe/nvtv0gplkh) também poderá trazer uma maior clareza, além das diretrizes mencionadas logo abaixo.
 
-
 |Diretriz                   |Pergunta                                                                                            |Incorporar|Referenciar|
 |---------------------------|----------------------------------------------------------------------------------------------------|----------|-----------|
 |Simplicidade               |Manter as informações juntas levaria a um modelo de dados e código mais simples?                    |Sim       |Não        |
@@ -33,7 +32,7 @@ Regra de ouro: [i]"Dados que são acessados juntos, devem permanecer juntos".
 |Carga de Trabalho          |As informações são escritas em momentos diferentes em uma carga de trabalho com muita gravação?     |Não       |Sim        |
 |Individualidade            |Para o lado ‘filho' do relacionamento, as peças podem existir por si mesmas, sem um 'pai’?          |Não       |Sim        |
 
-![](img/modeling.png)
+![](../img/modeling.png)
 
 ### Padrões de Design de Esquema (Design Patterns)
 - [Building with Patterns: A Summary](https://www.mongodb.com/blog/post/building-with-patterns-a-summary/)
