@@ -283,7 +283,7 @@ db.coll.stats()
 
 ## Checando integridade de uma coleção
 ```js
-db.collection.validate( { full: true } )
+db.coll.validate( { full: true } )
 ```
 
 O comando acima tende a gerar alto custo computacional, podendo afetar o desempenho da instância, já que o método obtém um bloqueio exclusivo (Bloqueia leituras e gravações até que a operação termine). Para maiores informações, consulte sempre a [documentação](https://www.mongodb.com/pt-br/docs/manual/reference/method/db.collection.validate/).
