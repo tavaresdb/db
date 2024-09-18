@@ -1,6 +1,5 @@
-// Obtém as estatísticas de todas as coleções. É possível obter o totalSize através da soma entre storageSize e totalIndexSize.
+// Lista as estatísticas de todas as coleções. É possível obter o totalSize através da soma entre storageSize e totalIndexSize.
 // Ref.: https://studio3t.com/whats-new/how-to-get-mongodb-statistics-for-all-collections-studio3t_ama/
-
 var dbs = db.getMongo().getDBNames();
 
 for (adb of dbs) {
@@ -21,8 +20,7 @@ for (adb of dbs) {
     }
 }
 
-// Lista de todos os índices de um banco de dados, desconsiderando coleções com sufixo especificado.
-
+// Lista todos os índices de um banco de dados, desconsiderando coleções com sufixo especificado.
 var dbName = "db";
 
 var collections = db.getSiblingDB(dbName).getCollectionNames();
