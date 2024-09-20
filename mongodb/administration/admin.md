@@ -89,40 +89,37 @@ db.system.profile.find(
 db.setProfilingLevel(0, 100)
 ```
 
-# Usuários
+# Planos de query (Query Plans)
+Para qualquer query, o planejador de queries do MongoDB escolhe e armazena em cache o plano de query mais eficiente, considerando os índices disponíveis. Para avaliar a eficiência dos planos de query, o planejador de queries executa todos os planos candidatos durante um período de avaliação. Em geral, o plano vencedor é o plano de query que produz mais resultados durante o período de avaliação enquanto executa a menor quantidade de trabalho(Workers).
 
-## Criação de usuário
+A entrada de cache do plano associado é usada para queries subsequentes com a mesma forma de query.
+
+O diagrama a seguir ilustra a lógica do planejador de consulta:
+
+![](../img/general-query-planner-logic.svg)
+
+# Plano de execução
+O comando abaixo irá gerar o plano de execução da consulta:
 ```js
-db.createUser(
-   {
-     user: "user-name",
-     pwd: passwordPrompt(),  // Or  "<cleartext password>"
-     roles: [ { role: "userAdmin", db: "db-name" } ]
-   }
-)
+db.coll.explain("executionStats").find( { key: "value" } )
 ```
 
-## Redefinição de senha
-```js
-db.changeUserPassword("user-name", passwordPrompt())
-```
+O comando acima irá retornar algumas informações, como:
 
-## Redefinição de permissões pro usuário
-```js
-db.getSiblingDB("admin").runCommand(
-  {
-    grantRolesToUser: "user-name",
-    roles: [ { role: "readWrite", db: "database-name" }, { role: "read", db: "db-name" } ]
-  }
-)
-```
+- `totalKeysExamined`: Número de chaves que o MongoDB analisou;
 
-Obs.: O comando acima especifica o banco de dados admin, pois nesse contexto os usuários foram centralizados nesse banco. Ajuste o valor conforme necessário.
+- `totalDocsExamined`: Número de documentos que o MongoDB analisou;
 
-## Remoção de usuário
-```js
-db.dropUser("user-name")
-```
+- `executionTimeMillis`: Tempo em ms necessário para execução da consulta;
+
+- `nReturned`: Número de documentos devolvidos;
+
+- `needYield`: Número de vezes que a consulta pausou para permitir que uma solicitação de gravação procedesse;
+
+- `indexBounds`: Descrição de como o índice foi usado, dando faixas de como o índice percorreu.
+
+
+Obs.: Quanto mais próximo o `totalKeysExamined` de `nReturned`, melhor.
 
 # Índices
 Regra de ouro: *"Ao criar índices compostos, adotar o padrão ESR (Equality, Sort and Range) tende a ser uma ótima prática"*.
@@ -157,28 +154,40 @@ db.coll.aggregate( [ { $indexStats: {} } ] )
 db.coll.find( { key1: { $gt: 10 }, key2: 20 } ).sort( { key1: 1 } ).hint( { key2: 1 } )
 ```
 
-# Plano de execução
-O comando abaixo irá gerar o plano de execução da consulta:
+# Usuários
+
+## Criação de usuário
 ```js
-db.coll.explain("executionStats").find( { key: "value" } )
+db.createUser(
+   {
+     user: "user-name",
+     pwd: passwordPrompt(),  // Or  "<cleartext password>"
+     roles: [ { role: "userAdmin", db: "db-name" } ]
+   }
+)
 ```
 
-O comando acima irá retornar algumas informações, como:
+## Redefinição de senha
+```js
+db.changeUserPassword("user-name", passwordPrompt())
+```
 
-- `totalKeysExamined`: Número de chaves que o MongoDB analisou;
+## Redefinição de permissões pro usuário
+```js
+db.getSiblingDB("admin").runCommand(
+  {
+    grantRolesToUser: "user-name",
+    roles: [ { role: "readWrite", db: "database-name" }, { role: "read", db: "db-name" } ]
+  }
+)
+```
 
-- `totalDocsExamined`: Número de documentos que o MongoDB analisou;
+Obs.: O comando acima especifica o banco de dados admin, pois nesse contexto os usuários foram centralizados nesse banco. Ajuste o valor conforme necessário.
 
-- `executionTimeMillis`: Tempo em ms necessário para execução da consulta;
-
-- `nReturned`: Número de documentos devolvidos;
-
-- `needYield`: Número de vezes que a consulta pausou para permitir que uma solicitação de gravação procedesse;
-
-- `indexBounds`: Descrição de como o índice foi usado, dando faixas de como o índice percorreu.
-
-
-Obs.: Quanto mais próximo o `totalKeysExamined` de `nReturned`, melhor.
+## Remoção de usuário
+```js
+db.dropUser("user-name")
+```
 
 # ReplicaSet
 A replicação está preocupada em manter uma cópia idêntica de dados em vários servidores. A maneira como o MongoDB realiza isso é mantendo um registro de operações (Oplog), contendo cada gravação que um primário realiza. Esta é uma coleção limitada ([Capped Collection](https://www.mongodb.com/pt-br/docs/manual/core/capped-collections/)) que vive no banco de dados local no primário. Os secundários consultam esta coleção para que as operações se repliquem. Cada secundário mantém seu próprio oplog, registrando cada operação que replica do primário. Isso permite que qualquer membro seja usado como uma fonte de sincronização para qualquer outro membro. Os secundários buscam operações do membro de onde estão sincronizando, aplicam as operações ao seu conjunto de dados e, em seguida, escrevem as operações em seu oplog.
@@ -262,6 +271,9 @@ Para interromper e reverter uma transação, o método seria o seguinte: `sessio
 
 # Outros
 
+## Configurando o serviço para a instância
+Ao criar o serviço para a instância MongoDB, atente-se ao parâmetro `TimeoutStartSec`, de modo que não seja especificado um valor baixo. Se especificado um valor baixo, há possibilidade da instância não ser iniciada durante uma recuperação, por exemplo.
+
 ## Capturando métricas básicas da instância
 ```js
 db.serverStatus().extra_info.page_faults // Indica a frequência com que os dados não são localizados na memória RAM pelo MongoDB (Consequentemente há necessidade de acessar o disco)
@@ -304,9 +316,13 @@ sh.status()
 
 - https://www.percona.com/blog/mongodb-converting-replica-set-to-standalone/
 
+- https://www.alibabacloud.com/help/en/mongodb/use-cases/query-plans-and-query-replanning
+
 - https://studio3t.com/knowledge-base/articles/mongodb-query-performance/
 
 # Referências
 - Livro MongoDB: The Definitive Guide - 3ª Edição, por Shannon Bradshaw, Eoin Brazil e Kristina Chodorow. Páginas 390; 428-429.
+
+- https://www.mongodb.com/pt-br/docs/manual/core/query-plans/
 
 - https://www.mongodb.com/pt-br/docs/manual/tutorial/enforce-keyfile-access-control-in-existing-replica-set/
