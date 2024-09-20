@@ -10,8 +10,8 @@ Esta é uma lista dos arquivos encontrados em um diretório de dados de um servi
 - WiredTigerLAS.wt;
 - _mdb_catalog.wt;
 - collection-n.wt;
-- diagnostic.data;
 - index-n.wt;
+- diagnostic.data;
 - journal;
 - mongod.lock;
 - sizeStorer.wt;
@@ -32,17 +32,17 @@ Mesmo em uma nova implantação do MongoDB, normalmente possuímos alguns bancos
 Se tentarmos examinar esses arquivos de dados usando um editor de texto, observaremos que os mesmos não são legíveis. Esses arquivos foram projetados para serem interagidos através do processo do servidor MongoDB, em vez de uma ferramenta de terceiros. A modificação dessas ferramentas pode levar à perda de dados e falhas.
 
 
-Agora, a pasta diagnostic.data vale a pena ser conferida. Os dados contidos nesse diretório contêm informações de diagnóstico capturadas para uso específico pelo suporte do MongoDB. Para ser bem claro, não estão capturando nenhum dos nossos dados particulares reais. Os dados de diagnóstico são capturados pelo módulo Full Time Data Capture, ou FTDC. O FTDC coleta dados dos seguintes comandos: `db.serverStatus({tcmalloc: true})`, `rs.status()`, `db.getSiblingDB('local').oplog.rs.status()`, `db.adminCommand({getCmdLineOpts: true})`, `db.adminCommand({buildInfo: true})`, `db.adminCommand({hostInfo: true})`, etc..
+Agora, a pasta diagnostic.data vale a pena ser conferida. Os dados contidos nesse diretório contêm informações de diagnóstico capturadas para uso específico pelo suporte do MongoDB. Para ser bem claro, não estão capturando nenhum dos nossos dados particulares reais. Os dados de diagnóstico são capturados pelo módulo Full Time Data Capture, ou FTDC. O [FTDC](https://www.mongodb.com/pt-br/docs/manual/administration/analyzing-mongodb-performance/#full-time-diagnostic-data-capture) coleta dados de comandos como: `db.serverStatus({tcmalloc: true})`, `rs.status()`, `db.getSiblingDB('local').oplog.rs.status()`, `db.adminCommand({getCmdLineOpts: true})`, `db.adminCommand({buildInfo: true})` e `db.adminCommand({hostInfo: true})`.
 Se tentarmos dar uma olhada nos dados produzidos pelo módulo FTDC usando algum editor de texto, veremos que não são legíveis para humanos. Esses dados são usados ​​apenas para fins de diagnóstico pelos engenheiros de suporte do MongoDB. E eles só podem ver esses dados se nós fornecermos explicitamente.
 
 
-Avançando, vamos dar uma olhada em nossos arquivos de journal. Cada um desses arquivos de journal faz parte do sistema de diário WiredTiger. Com o MongoDB WiredTiger, as operações de gravação são armazenadas em buffer na memória e liberadas a cada 60 segundos, criando um checkpoint. O WiredTiger também usa um sistema de log de gravação antecipada em um arquivo de journal em disco.
-As entradas de journal são primeiramente armazenadas em buffer na memória e, em seguida, o WiredTiger sincroniza o journal em disco a cada 50 milissegundos. Cada arquivo de journal é limitado a 100 megabytes de tamanho.
+Avançando, vamos dar uma olhada em nossos arquivos de journal. Cada um desses arquivos de journal faz parte do sistema de diário WiredTiger. Com o MongoDB WiredTiger, as operações de gravação são armazenadas em buffer na memória e liberadas a cada 60 s, criando um checkpoint. O WiredTiger também usa um sistema de log de gravação antecipada em um arquivo de journal em disco.
+As entradas de journal são primeiramente armazenadas em buffer na memória e, em seguida, o WiredTiger sincroniza o journal em disco a cada 50 ms. Cada arquivo de journal é limitado a 100 MB.
 
 ![](../img/07.png)
 
 O WiredTiger usa um método de rotação de arquivos para sincronizar dados no disco. No caso de uma falha, o WiredTiger pode usar o journal para recuperar dados que ocorreram entre os checkpoints.
-Por exemplo, durante operações normais, o WiredTiger libera os dados para o disco a cada 60 segundos ou quando o arquivo de journal possuir 2 gigabytes de dados. Essas descargas criam novamente um checkpoint durável.
+Por exemplo, durante operações normais, o WiredTiger libera os dados para o disco a cada 60 s ou quando o arquivo de journal possuir 2 GB de dados. Essas descargas criam novamente um checkpoint durável.
 
 ![](../img/08.png)
 
@@ -50,7 +50,7 @@ Se o `mongod` travar entre os checkpoints, é possível que os dados não tenham
 
 ![](../img/09.png)
 
-Quando o MongoDB ficar on-line novamente, o WiredTiger pode verificar se há alguma recuperação a ser feita. Caso existam gravações incompletas, o WiredTiger examinará os arquivos de dados existentes para encontrar o identificador do último checkpoint. Em seguida, ele pesquisa nos arquivos de journal o registro que corresponde ao identificador do último checkpoint. Por fim, aplica operações nos arquivos do journal desde o último checkpoint.
+Quando o MongoDB ficar disponível novamente, o WiredTiger pode verificar se há alguma recuperação a ser feita. Caso existam gravações incompletas, o WiredTiger examinará os arquivos de dados existentes para encontrar o identificador do último checkpoint. Em seguida, ele pesquisa nos arquivos de journal o registro que corresponde ao identificador do último checkpoint. Por fim, aplica operações nos arquivos do journal desde o último checkpoint.
 
 ![](../img/10.png)
 
@@ -64,7 +64,7 @@ O arquivo mongod.lock tem uma função semelhante ao arquivo WiredTiger.lock. Se
 Qualquer outro processo do MongoDB que tente acessar esse diretório falhará ao inicializar nesse evento. Se esse arquivo estiver vazio, tudo ficará bem.
 Em algumas situações incomuns, como um desligamento inesperado, o arquivo mongod.lock não estará vazio, mesmo que o `mongod` não esteja mais em execução. Pode ser necessário excluir o arquivo mongod.lock, se solicitado pelo suporte ou pela documentação oficial.
 
-Esses dois arquivos restantes (sizeStorer.wt e storage.bson) são mais arquivos de suporte e metadados para o WiredTiger.
+Quanto aos dois arquivos restantes (sizeStorer.wt e storage.bson), são mais arquivos de suporte e metadados para o WiredTiger.
 Lembre-se de que nunca precisaremos interagir com nenhum desses arquivos e modificá-los pode resultar em falhas ou perda de dados.
 
 
