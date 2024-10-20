@@ -13,6 +13,8 @@ Para mitigar esses impactos, considere as seguintes estratégias:
 
 **Configurações do MongoDB:** Existem configurações no MongoDB que podemos ajustar para otimizar o comportamento durante cargas massivas. Por exemplo, a configuração writeConcern pode ser ajustada para compromissos mais flexíveis durante operações de gravação intensivas. A ativação do parâmetro tcmallocAggressiveMemoryDecommit também pode ser interessante, conforme demonstrado [neste artigo](https://tech.oyorooms.com/mongodb-out-of-memory-kill-process-mongodb-using-too-much-memory-solved-44e9ae577bed). É importante também dimensionar corretamente o oplog, para que as operações sejam retidas por um tempo suficiente.
 
+Obs.: À partir da versão 8 o parâmetro tcmallocAggressiveMemoryDecommit torna-se depreciado. O motivo disso é que nessa nova versão há melhorias no TCMalloc que usa caches por CPU, em vez de caches por thread, para reduzir a fragmentação de memória, tornando o banco de dados mais resiliente a cargas de trabalho de alto estresse. Para maiores detalhes, consule a [documentação oficial](https://mongodb.com/docs/upcoming/administration/tcmalloc-performance/#std-label-tcmalloc-performance).
+
 **Sharding:** Se a escalabilidade horizontal for uma opção, considere a fragmentação (sharding) dos dados para distribuir a carga entre vários servidores.
 
 Outro ponto, caso o processamento seja em lote (batch processing), para inserir dados no MongoDB de maneira eficiente e não agressiva, existem algumas estratégias que também devemos considerar. Aqui estão algumas sugestões:

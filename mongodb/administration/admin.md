@@ -198,7 +198,7 @@ Se a aplicação de uma operação falhar (o que só deve acontecer se os dados 
 
 ## Monitorando a replicação
 ```js
-db.hello() //For old versions, rs.isMaster()
+db.hello() //Para versões antigas, rs.isMaster()
 rs.status()
 rs.printReplicationInfo()
 rs.printSecondaryReplicationInfo()
@@ -268,6 +268,52 @@ session.commitTransaction()
 ```
 
 Para interromper e reverter uma transação, o método seria o seguinte: `session.abortTransacion()`.
+
+# Exportando dados
+```bash
+mongodump \
+  --host="hostname.domain.com" \
+  --port=27017 \
+  --username="user-name" \
+  --authenticationDatabase=admin \
+  --collection=coll \
+  --db="db-name" \
+  --out=/opt/backup
+```
+
+```bash
+mongoexport \
+  --host="hostname.domain.com" \
+  --port=27017 \
+  --username="user-name" \
+  --authenticationDatabase=admin \
+  --collection=coll \
+  --db="db-name" \
+  --out=/opt/backup
+```
+
+# Importando dados
+```bash
+mongorestore \
+  --host="hostname.domain.com" \
+  --port=27017 \
+  --username="user-name" \
+  --authenticationDatabase=admin \
+  --collection="rest-coll" \
+  --db="db-name" \
+  /opt/backup/coll.bson
+```
+
+```bash
+mongoimport \
+  --host="hostname.domain.com" \
+  --port=27017 \
+  --username="user-name" \
+  --authenticationDatabase=admin \
+  --collection="rest-coll" \
+  --db="db-name" \
+  --file=/opt/backup/coll.json
+```
 
 # Outros
 
