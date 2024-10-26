@@ -33,8 +33,8 @@ O diagrama a seguir mostra um cluster privado regional standard do GKE implantad
 Para implantar essa infraestrutura, execute os seguintes comandos no Cloud Shell:
 ```bash
 export GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token)
-terraform -chdir=iac/gke-standard init
-terraform -chdir=iac/gke-standard apply -var project_id=${PROJECT_ID} \
+terraform -chdir=manifests/iac/gke-standard init
+terraform -chdir=manifests/iac/gke-standard apply -var project_id=${PROJECT_ID} \
   -var region=${REGION} \
   -var cluster_prefix=${KUBERNETES_CLUSTER_PREFIX}
 ```
@@ -68,19 +68,17 @@ kubectl create ns ${NAMESPACE}
 kubectl config set-context --current --namespace=${NAMESPACE}
 ```
 
-## Criação do ConfigMap e Secret
+## Criação do Secret
 ```bash
 sudo bash -c "openssl rand -base64 756 > mongodb-keyfile"
 sudo chmod 400 mongodb-keyfile
 
 kubectl create secret generic mongodb-keyfile-secret --from-file=mongodb-keyfile
 
-kubectl apply -f manifests/sts/credentials.yaml
-kubectl get cm
 kubectl get secret
 ```
 
-Configurar a autenticação para o conjunto de réplicas usando keyfile é crucial para proteger a comunicação entre membros. Dessa forma evitamos acesso não autorizado e garantimos que somente nós confiáveis possam ingressar no conjunto de réplicas, mantendo assim a integridade e a segurança dos dados. Tal arquivo será direcionado para um Secret. Além disso, as credenciais do usuário para acesso ao MongoDB serão mantidas em um ConfigMap e Secret.
+Configurar a autenticação para o conjunto de réplicas usando keyfile é crucial para proteger a comunicação entre membros. Dessa forma evitamos acesso não autorizado e garantimos que somente nós confiáveis possam ingressar no conjunto de réplicas, mantendo assim a integridade e a segurança dos dados no MongoDB. Tal arquivo será direcionado para um Secret.
 
 ## Criação do StorageClass
 ```bash
@@ -92,7 +90,7 @@ Essa classe de armazenamento usa o tipo de disco permanente `pd-standard` (Para 
 
 ## Criação do StatefulSet
 ```bash
-kubectl apply -f sts.yaml
+kubectl apply -f manifests/sts/sts.yaml
 kubectl get sts --watch
 ```
 
@@ -104,16 +102,15 @@ Essa implantação contará com os seguintes componentes:
 
 • Ao especificar a solicitação de recurso para contêineres em um pod, o kube-scheduler usará essas informações para decidir em qual nó o pod será alocado. Ao especificar um limite de recurso para um contêiner, o kubelet aplicará esse limite para que o contêiner não tenha permissão para usar mais desse recurso do que o limite definido.
 
-• Ao especificar um contexto de segurança estabelecemos boas práticas quanto ao privilégio e controle de acesso para pods e contêineres.
-
 Além do StatefulSet, esse manifesto implementa um [Headless Service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) para gerenciar identidades de redes estáveis para os pods MongoDB.
 
 ## Configuração do replicaSet
 ```bash
 kubectl exec -it mongodb-0 -- mongosh
 
+use admin
 rs.initiate({
-  _id: "rs0",
+  _id: "k8s_rs",
   members: [
     { _id: 0, host: "mongodb-0.mongodb-service:27017", priority: 2 },
     { _id: 1, host: "mongodb-1.mongodb-service:27017", priority: 1 },
@@ -122,13 +119,32 @@ rs.initiate({
 })
 
 rs.status()
+```
+
+## Configuração de usuários
+```bash
+db.createUser(
+   {
+     user: "admin",
+     pwd: passwordPrompt(),
+     roles: [ "root", "admin" ]
+   }
+)
+
+db.createUser( { user: "mongodb-exporter",
+                 pwd: passwordPrompt(),
+                 roles: [ { role: "clusterMonitor", db: "admin" },
+                          { role: "read", db: "local" }
+                        ] } )
+
+show users
 
 exit
 ```
 
 ## Criação do PDB
 ```bash
-kubectl apply -f pdb.yaml
+kubectl apply -f manifests/sts/pdb.yaml
 kubectl get pdb
 ```
 
@@ -163,19 +179,22 @@ kubectl apply -f manifests/sts/exporter.yaml
 kubectl apply -f manifests/sts/pod-monitoring.yaml
 ```
 
-3. No console do Google Cloud, acesse a página [Painel de clusters do GKE](https://console.cloud.google.com/monitoring/dashboards/resourceList/gmp_gke_cluster?hl=pt-br). O painel mostrará uma taxa de ingestão de métricas diferente de 0.
+3. Para verificar se o MongoDB Exporter foi configurado corretamente, verifique o [Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?hl=pt-br). Na barra de ferramentas do painel do criador de consultas, selecione o botão `<> MQL` ou `<> PromQL`. Verifique se PromQL está selecionado na opção de ativar/desativar PromQL. A alternância de idiomas está na mesma barra de ferramentas que permite formatar sua consulta. Em seguida, execute a consulta à seguir.
+```bash
+up{job="mongodb", cluster="mongodb-cluster", namespace="ns-mongodb"}
+```
 
-4. No console do Google Cloud, acesse a página [Painéis](https://console.cloud.google.com/monitoring/dashboards?hl=pt-br).
+4. Para verificar o painel, acesse a página [Painéis](https://console.cloud.google.com/monitoring/dashboards?hl=pt-br), selecione a guia Lista de painéis, escolha a categoria Integrações e clique no nome do painel. Para acessar as métricas, acesse a página de [Integrações](https://console.cloud.google.com/monitoring/integrations?hl=pt-br), clique no filtro de plataforma de implantação do Kubernetes Engine, localize a integração com o MongoDB, clique em Visualizar detalhes e selecione a guia Painéis.
 
-5. Abra o painel de informações gerais do MongoDB Prometheus. O painel mostra a quantidade de conexões e documentos. Pode levar vários minutos para que o painel seja provisionado automaticamente.
-
-6. Conecte-se ao MongoDB.
+5. Conecte-se ao MongoDB.
 ```bash
 kubectl exec -it mongodb-0 -- mongosh
 ```
 
-7. Crie novos documentos.
+6. Crie novos documentos.
 ```bash
+db.auth( "admin", passwordPrompt() )
+
 use users
 
 db.coll.insertOne({ name: "Jane Doe", age: 30, email: "jane.doe@example.com" })
@@ -188,7 +207,7 @@ db.coll.find()
 exit
 ```
 
-8. Atualize a página e observe que os gráficos foram atualizados para mostrar o estado real do banco de dados.
+7. Atualize a página e observe que os gráficos foram atualizados para mostrar o estado real do banco de dados.
 
 ![](img/01.png)
 
@@ -212,7 +231,7 @@ Lembre-se das seguintes considerações antes de iniciar o processo de upgrade:
 
 • À partir da versão 7.0, os downgrades não são mais suportados para o MongoDB Community Edition. Dedique um tempo para entender as implicações de um upgrade.
 
-• Inicie o upgrade nos pods que hospedam os nós secundários do MongoDB. Concluído, convoque uma eleição, de modo que o atual primário torne-se secundário e seja possível concluir a atualização do conjunto de réplicas (Optei por configurar o `updateStrategy` como `onDelete` para ter maior controle de como ocorrerá a atualização dos binários).
+• Inicie o upgrade nos pods que hospedam os nós secundários do MongoDB. Concluído, convoque uma eleição, de modo que o atual primário torne-se secundário e seja possível concluir a atualização do conjunto de réplicas (Optei por configurar o `updateStrategy` como `OnDelete` para ter maior controle de como ocorrerá a atualização dos binários).
 
 
 Para manter este tutorial simples, foi adotado o seguinte procedimento:
@@ -291,11 +310,11 @@ exit
 
 # Exclusão dos recursos
 ```bash
-terraform -chdir=iac/gke-standard destroy -var project_id=${PROJECT_ID} \
+terraform -chdir=manifests/iac/gke-standard destroy -var project_id=${PROJECT_ID} \
   -var region=${REGION} \
   -var cluster_prefix=${KUBERNETES_CLUSTER_PREFIX}
 
-export disk_list=$(gcloud compute disks list --filter="-users:* AND labels.goog-k8s-cluster-name=${KUBERNETES_CLUSTER_PREFIX}-cluster" --format "value[separator=|](name,zone)")
+export disk_list=$(gcloud compute disks list --filter="-users:*" --format "value[separator=|](name,zone)")
 
 for i in $disk_list; do
   disk_name=$(echo $i| cut -d'|' -f1)
@@ -304,6 +323,8 @@ for i in $disk_list; do
   gcloud compute disks delete $disk_name --zone $disk_zone --quiet
 done
 ```
+
+Obs.: Antes de prosseguir com a destruição dos discos, avalie o valor que será definido na variável `disk_list`. Dependendo do ambiente pode ser necessário ajustar o comando, de modo que não sejam destruídos recursos indevidos.
 
 # Referências
 - https://www.mongodb.com/developer/products/mongodb/mongodb-with-kubernetes/

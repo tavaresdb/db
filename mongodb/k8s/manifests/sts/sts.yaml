@@ -15,11 +15,6 @@ spec:
       labels:
         app: mongodb
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 2000
-        runAsGroup: 2000
-        fsGroup: 2000
       topologySpreadConstraints:
       - labelSelector:
           matchLabels:
@@ -49,18 +44,7 @@ spec:
           - "--wiredTigerCacheSizeGB=0.25"
           - "--oplogSize=1024"
           - "--replSet=k8s_rs"
-          - "--keyFile=/etc/mongodb/keyfile"  
-          env:
-          - name: MONGO_INITDB_ROOT_USERNAME
-            valueFrom:
-              configMapKeyRef:
-                name: mongodb-map
-                key: username
-          - name: MONGO_INITDB_ROOT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: mongodb-secret
-                key: password
+          - "--keyFile=/etc/mongodb/mongodb-keyfile"  
           ports:
             - name: mongodb
               containerPort: 27017
@@ -75,14 +59,11 @@ spec:
           - name: mongodb-storage
             mountPath: /data/db
           - name: mongodb-keyfile
-            mountPath: /etc/mongo/keyfile
-            subPath: ./keyfile
+            mountPath: /etc/mongodb/mongodb-keyfile
+            #subPath: ./mongodb-keyfile
             readOnly: true
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false # Aqui foi definido como false, pois pode ser necessário para o BD operar corretamente; Sempre que possível, defina como true, visto que é uma prática comum de segurança
   updateStrategy:
-    type: onDelete
+    type: OnDelete
   volumeClaimTemplates:
   - metadata:
       name: mongodb-storage

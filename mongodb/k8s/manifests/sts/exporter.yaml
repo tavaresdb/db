@@ -13,6 +13,24 @@
 # limitations under the License.
 #
 # P.S.: Modifications were made to the file, compared to the original file.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-map
+data:
+  username: mongodb-exporter
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-secret 
+type: Opaque
+data:
+  password: UGFzc3dvcmQkMTIzNDU2 # Password$123456
+
+---
 
 apiVersion: apps/v1
 kind: Deployment
