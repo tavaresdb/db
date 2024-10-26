@@ -60,7 +60,7 @@ spec:
             mountPath: /data/db
           - name: mongodb-keyfile
             mountPath: /etc/mongodb/mongodb-keyfile
-            #subPath: ./mongodb-keyfile
+            subPath: ./mongodb-keyfile
             readOnly: true
   updateStrategy:
     type: OnDelete

@@ -70,8 +70,8 @@ kubectl config set-context --current --namespace=${NAMESPACE}
 
 ## Criação do Secret
 ```bash
-sudo bash -c "openssl rand -base64 756 > mongodb-keyfile"
-sudo chmod 400 mongodb-keyfile
+bash -c "openssl rand -base64 756 > mongodb-keyfile"
+chmod 400 mongodb-keyfile
 
 kubectl create secret generic mongodb-keyfile-secret --from-file=mongodb-keyfile
 
@@ -127,10 +127,11 @@ db.createUser(
    {
      user: "admin",
      pwd: passwordPrompt(),
-     roles: [ "root", "admin" ]
+     roles: [ { role: "root", db: "admin" } ]
    }
 )
 
+db.auth( "admin", passwordPrompt() )
 db.createUser( { user: "mongodb-exporter",
                  pwd: passwordPrompt(),
                  roles: [ { role: "clusterMonitor", db: "admin" },
@@ -179,19 +180,12 @@ kubectl apply -f manifests/sts/exporter.yaml
 kubectl apply -f manifests/sts/pod-monitoring.yaml
 ```
 
-3. Para verificar se o MongoDB Exporter foi configurado corretamente, verifique o [Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?hl=pt-br). Na barra de ferramentas do painel do criador de consultas, selecione o botão `<> MQL` ou `<> PromQL`. Verifique se PromQL está selecionado na opção de ativar/desativar PromQL. A alternância de idiomas está na mesma barra de ferramentas que permite formatar sua consulta. Em seguida, execute a consulta à seguir.
-```bash
-up{job="mongodb", cluster="mongodb-cluster", namespace="ns-mongodb"}
-```
-
-4. Para verificar o painel, acesse a página [Painéis](https://console.cloud.google.com/monitoring/dashboards?hl=pt-br), selecione a guia Lista de painéis, escolha a categoria Integrações e clique no nome do painel. Para acessar as métricas, acesse a página de [Integrações](https://console.cloud.google.com/monitoring/integrations?hl=pt-br), clique no filtro de plataforma de implantação do Kubernetes Engine, localize a integração com o MongoDB, clique em Visualizar detalhes e selecione a guia Painéis.
-
-5. Conecte-se ao MongoDB.
+3. Conecte-se ao MongoDB.
 ```bash
 kubectl exec -it mongodb-0 -- mongosh
 ```
 
-6. Crie novos documentos.
+4. Crie novos documentos.
 ```bash
 db.auth( "admin", passwordPrompt() )
 
@@ -207,13 +201,24 @@ db.coll.find()
 exit
 ```
 
-7. Atualize a página e observe que os gráficos foram atualizados para mostrar o estado real do banco de dados.
+Obs.: Os dados inseridos serão suficientes para refletir no painel, conforme detalhado à seguir.
+
+3. Para verificar se o MongoDB Exporter foi configurado corretamente, verifique o [Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?hl=pt-br). Na barra de ferramentas do painel do criador de consultas, selecione o botão `<> MQL` ou `<> PromQL`. Em seguida, execute a consulta à seguir (O painel mostrará uma taxa de ingestão de métricas diferente de 0.).
+```bash
+up{job="mongodb", cluster="mongodb-cluster", namespace="ns-mongodb"}
+```
 
 ![](img/01.png)
+
+4. Para verificar o painel e as respectivas métricas, acesse a página [Painéis](https://console.cloud.google.com/monitoring/dashboards?hl=pt-br), selecione a guia *Lista de painéis*, escolha a categoria *Integrações* e clique no nome do painel (*MongoDB Prometheus Overview*). Observe que os gráficos refletem o estado real do banco de dados.
 
 ![](img/02.png)
 
 ![](img/03.png)
+
+![](img/04.png)
+
+![](img/05.png)
 
 # Backup e Restore
 Existem algumas formas de fazer backup e restauração dos dados. Nesse tutorial não irei entrar em detalhes, mas uma alternativa seria o [Backup for GKE](https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/concepts/backup-for-gke?hl=pt-br).
@@ -240,20 +245,19 @@ Para manter este tutorial simples, foi adotado o seguinte procedimento:
 # Atualização da imagem
 kubectl set image statefulset/mongodb mongodb=mongo:7.0.1
 
+kubectl get sts -o wide
+
 # Remoção do pod que hospeda um dos nós secundários
 kubectl delete pod mongodb-1
 
 # Verificação do status
 kubectl get pods --selector=app=mongodb
 
-kubectl rollout status statefulset/mongodb
-
-# Inspeção do StatefulSet
-kubectl get sts -o wide
-
 # Inspeção do MongoDB
 kubectl exec -it mongodb-1 -- mongosh
 
+use admin
+db.auth( "admin", passwordPrompt() )
 db.version()
 rs.status()
 
@@ -265,14 +269,11 @@ kubectl delete pod mongodb-2
 # Verificação do status
 kubectl get pods --selector=app=mongodb
 
-kubectl rollout status statefulset/mongodb
-
-# Inspeção do StatefulSet
-kubectl get sts -o wide
-
 # Inspeção do MongoDB
-kubectl exec -it mongodb-1 -- mongosh
+kubectl exec -it mongodb-2 -- mongosh
 
+use admin
+db.auth( "admin", passwordPrompt() )
 db.version()
 rs.status()
 
@@ -281,6 +282,8 @@ exit
 # Eleição de um novo nó primário no conjunto de réplicas do MongoDB
 kubectl exec -it mongodb-0 -- mongosh
 
+use admin
+db.auth( "admin", passwordPrompt() )
 rs.stepDown()
 rs.status()
 
@@ -292,18 +295,17 @@ kubectl delete pod mongodb-0
 # Verificação do status
 kubectl get pods --selector=app=mongodb
 
-kubectl rollout status statefulset/mongodb
+# Inspeção do MongoDB e definição da versão de compatibilidade
+kubectl exec -it mongodb-0 -- mongosh
 
-# Inspeção do StatefulSet
-kubectl get sts -o wide
-
-# Inspeção do MongoDB
-kubectl exec -it mongodb-1 -- mongosh
-
+use admin
+db.auth( "admin", passwordPrompt() )
 db.version()
 rs.status()
+
 db.adminCommand( { getParameter: 1, featureCompatibilityVersion: 1 } )
-db.adminCommand( { setFeatureCompatibilityVersion: "7.0" } )
+db.adminCommand( { setFeatureCompatibilityVersion: "7.0", confirm: true } )
+db.adminCommand( { getParameter: 1, featureCompatibilityVersion: 1 } )
 
 exit
 ```
@@ -314,7 +316,7 @@ terraform -chdir=manifests/iac/gke-standard destroy -var project_id=${PROJECT_ID
   -var region=${REGION} \
   -var cluster_prefix=${KUBERNETES_CLUSTER_PREFIX}
 
-export disk_list=$(gcloud compute disks list --filter="-users:*" --format "value[separator=|](name,zone)")
+export disk_list=$(gcloud compute disks list --filter="-users:* AND labels.goog-k8s-cluster-name=${KUBERNETES_CLUSTER_PREFIX}-cluster" --format "value[separator=|](name,zone)")
 
 for i in $disk_list; do
   disk_name=$(echo $i| cut -d'|' -f1)
@@ -323,8 +325,6 @@ for i in $disk_list; do
   gcloud compute disks delete $disk_name --zone $disk_zone --quiet
 done
 ```
-
-Obs.: Antes de prosseguir com a destruição dos discos, avalie o valor que será definido na variável `disk_list`. Dependendo do ambiente pode ser necessário ajustar o comando, de modo que não sejam destruídos recursos indevidos.
 
 # Referências
 - https://www.mongodb.com/developer/products/mongodb/mongodb-with-kubernetes/

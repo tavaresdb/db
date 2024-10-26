@@ -55,7 +55,7 @@ O Terraform criará os seguintes recursos:
 
 • Google Cloud Managed Service para Prometheus para monitoramento de clusters.
 
-Por fim, recupere as credencias do cluster...
+Concluída a criação dos recursos, recupere as credencias do cluster conforme comando abaixo:
 
 ```bash
 gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_PREFIX}-cluster --region ${REGION}

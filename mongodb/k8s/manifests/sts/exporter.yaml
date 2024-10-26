@@ -63,8 +63,7 @@ spec:
               name: mongodb-secret
               key: password
         args:
-        # - --mongodb.uri=mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongodb-service:27017
-        - --mongodb.uri=mongodb://mongodb-service:27017
+        - --mongodb.uri=mongodb://$(MONGODB_USER):$(MONGODB_PASSWORD)@mongodb-service:27017
         - --collect-all
         ports:
         - name: prometheus
