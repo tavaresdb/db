@@ -203,14 +203,14 @@ exit
 
 Obs.: Os dados inseridos serão suficientes para refletir no painel, conforme detalhado à seguir.
 
-3. Para verificar se o MongoDB Exporter foi configurado corretamente, verifique o [Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?hl=pt-br). Na barra de ferramentas do painel do criador de consultas, selecione o botão `<> MQL` ou `<> PromQL`. Em seguida, execute a consulta à seguir (O painel mostrará uma taxa de ingestão de métricas diferente de 0.).
+5. Para verificar se o MongoDB Exporter foi configurado corretamente, verifique o [Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?hl=pt-br). Na barra de ferramentas do painel do criador de consultas, selecione o botão `<> MQL` ou `<> PromQL`. Em seguida, execute a consulta à seguir (O painel mostrará uma taxa de ingestão de métricas diferente de 0.).
 ```bash
 up{job="mongodb", cluster="mongodb-cluster", namespace="ns-mongodb"}
 ```
 
 ![](img/01.png)
 
-4. Para verificar o painel e as respectivas métricas, acesse a página [Painéis](https://console.cloud.google.com/monitoring/dashboards?hl=pt-br), selecione a guia *Lista de painéis*, escolha a categoria *Integrações* e clique no nome do painel (*MongoDB Prometheus Overview*). Observe que os gráficos refletem o estado real do banco de dados.
+6. Para verificar o painel e as respectivas métricas, acesse a página [Painéis](https://console.cloud.google.com/monitoring/dashboards?hl=pt-br), selecione a guia *Lista de painéis*, escolha a categoria *Integrações* e clique no nome do painel (*MongoDB Prometheus Overview*). Observe que os gráficos refletem o estado real do banco de dados.
 
 ![](img/02.png)
 
