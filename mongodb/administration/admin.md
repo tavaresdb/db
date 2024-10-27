@@ -90,7 +90,7 @@ db.setProfilingLevel(0, 100)
 ```
 
 # Planos de query (Query Plans)
-Para qualquer query, o planejador de queries do MongoDB escolhe e armazena em cache o plano de query mais eficiente, considerando os índices disponíveis. Para avaliar a eficiência dos planos de query, o planejador de queries executa todos os planos candidatos durante um período de avaliação. Em geral, o plano vencedor é o plano de query que produz mais resultados durante o período de avaliação enquanto executa a menor quantidade de trabalho(Workers).
+Para qualquer query, o planejador de queries do MongoDB escolhe e armazena em cache o plano de query mais eficiente, considerando os índices disponíveis. Para avaliar a eficiência dos planos de query, o planejador de queries executa todos os planos candidatos durante um período de avaliação. Em geral, o plano vencedor é o plano de query que produz mais resultados durante o período de avaliação enquanto executa a menor quantidade de trabalho (Workers).
 
 A entrada de cache do plano associado é usada para queries subsequentes com a mesma forma de query.
 
@@ -148,6 +148,13 @@ db.coll.getIndexes()
 ```js
 db.coll.aggregate( [ { $indexStats: {} } ] )
 ```
+
+## Ocultando um índice
+```js
+db.coll.hideIndex( "idx_name" )
+```
+
+Ao ocultar um índice do planejador, podemos avaliar o possível impacto na eliminação de um índice sem eliminá-lo. Se o impacto for negativo, podemos facilmente reverter a situação, executando o comando `db.coll.unhideIndex( "idx_name" )`, ao invés de recriar o índice.
 
 ## Exemplo do uso de hint
 ```js
@@ -269,7 +276,7 @@ session.commitTransaction()
 
 Para interromper e reverter uma transação, o método seria o seguinte: `session.abortTransacion()`.
 
-# Exportando dados
+# Exportando dados de uma coleção
 ```bash
 mongodump \
   --host="hostname.domain.com" \
@@ -292,7 +299,7 @@ mongoexport \
   --out=/opt/backup
 ```
 
-# Importando dados
+# Importando dados de uma coleção
 ```bash
 mongorestore \
   --host="hostname.domain.com" \
@@ -301,7 +308,7 @@ mongorestore \
   --authenticationDatabase=admin \
   --collection="rest-coll" \
   --db="db-name" \
-  /opt/backup/coll.bson
+  /opt/backup/db-name
 ```
 
 ```bash

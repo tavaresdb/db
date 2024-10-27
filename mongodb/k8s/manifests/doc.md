@@ -107,8 +107,10 @@ Além do StatefulSet, esse manifesto implementa um [Headless Service](https://ku
 ## Configuração do replicaSet
 ```bash
 kubectl exec -it mongodb-0 -- mongosh
-
+```
+```js
 use admin
+
 rs.initiate({
   _id: "k8s_rs",
   members: [
@@ -122,7 +124,7 @@ rs.status()
 ```
 
 ## Configuração de usuários
-```bash
+```js
 db.createUser(
    {
      user: "admin",
@@ -132,6 +134,7 @@ db.createUser(
 )
 
 db.auth( "admin", passwordPrompt() )
+
 db.createUser( { user: "mongodb-exporter",
                  pwd: passwordPrompt(),
                  roles: [ { role: "clusterMonitor", db: "admin" },
@@ -168,7 +171,7 @@ No diagrama, o cluster privado do GKE contém os seguintes componentes:
 
 • Um recurso de PodMonitoring que envia métricas ao Cloud Monitoring.
 
-O Google Cloud Managed Service for Prometheus é compatível com a coleta de métricas no formato do Prometheus. O Cloud Monitoring usa um [painel integrado](https://cloud.google.com/stackdriver/docs/managed-prometheus/exporters/mongodb?hl=pt-br)) para métricas do MongoDB.
+O Google Cloud Managed Service for Prometheus é compatível com a coleta de métricas no formato do Prometheus. O Cloud Monitoring usa um [painel integrado](https://cloud.google.com/stackdriver/docs/managed-prometheus/exporters/mongodb?hl=pt-br) para métricas do MongoDB.
 
 1. Colete as métricas no formato do Prometheus usando o [mongodb_exporter](https://github.com/percona/mongodb_exporter).
 ```bash
@@ -186,7 +189,7 @@ kubectl exec -it mongodb-0 -- mongosh
 ```
 
 4. Crie novos documentos.
-```bash
+```js
 db.auth( "admin", passwordPrompt() )
 
 use users
@@ -203,14 +206,14 @@ exit
 
 Obs.: Os dados inseridos serão suficientes para refletir no painel, conforme detalhado à seguir.
 
-5. Para verificar se o MongoDB Exporter foi configurado corretamente, verifique o [Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?hl=pt-br). Na barra de ferramentas do painel do criador de consultas, selecione o botão `<> MQL` ou `<> PromQL`. Em seguida, execute a consulta à seguir (O painel mostrará uma taxa de ingestão de métricas diferente de 0.).
+5. Para verificar se o MongoDB Exporter foi configurado corretamente, verifique o [Metrics Explorer](https://console.cloud.google.com/monitoring/metrics-explorer?hl=pt-br). Na barra de ferramentas do painel do criador de consultas, selecione o botão `<> MQL` ou `<> PromQL`. Em seguida, execute a consulta à seguir (O painel mostrará uma taxa de ingestão de métricas diferente de 0).
 ```bash
 up{job="mongodb", cluster="mongodb-cluster", namespace="ns-mongodb"}
 ```
 
 ![](img/01.png)
 
-6. Para verificar o painel e as respectivas métricas, acesse a página [Painéis](https://console.cloud.google.com/monitoring/dashboards?hl=pt-br), selecione a guia *Lista de painéis*, escolha a categoria *Integrações* e clique no nome do painel (*MongoDB Prometheus Overview*). Observe que os gráficos refletem o estado real do banco de dados.
+6. Para verificar o painel e as respectivas métricas, acesse a página [Painéis](https://console.cloud.google.com/monitoring/dashboards?hl=pt-br), selecione a guia **Lista de painéis**, escolha a categoria **Integrações** e clique no nome do painel (**MongoDB Prometheus Overview**). Observe que os gráficos refletem o estado real do banco de dados.
 
 ![](img/02.png)
 
@@ -234,7 +237,7 @@ Lembre-se das seguintes considerações antes de iniciar o processo de upgrade:
 
 • Faça um backup completo do banco de dados antes de implantar a versão atualizada.
 
-• À partir da versão 7.0, os downgrades não são mais suportados para o MongoDB Community Edition. Dedique um tempo para entender as implicações de um upgrade.
+• À partir da versão 7.0 os downgrades não são mais suportados para o MongoDB Community Edition. Dedique um tempo para entender as implicações de um upgrade.
 
 • Inicie o upgrade nos pods que hospedam os nós secundários do MongoDB. Concluído, convoque uma eleição, de modo que o atual primário torne-se secundário e seja possível concluir a atualização do conjunto de réplicas (Optei por configurar o `updateStrategy` como `OnDelete` para ter maior controle de como ocorrerá a atualização dos binários).
 
@@ -255,14 +258,15 @@ kubectl get pods --selector=app=mongodb
 
 # Inspeção do MongoDB
 kubectl exec -it mongodb-1 -- mongosh
-
+```
+```js
 use admin
 db.auth( "admin", passwordPrompt() )
 db.version()
 rs.status()
-
 exit
-
+```
+```bash
 # Remoção do pod que hospeda um dos nós secundários
 kubectl delete pod mongodb-2
 
@@ -271,24 +275,26 @@ kubectl get pods --selector=app=mongodb
 
 # Inspeção do MongoDB
 kubectl exec -it mongodb-2 -- mongosh
-
+```
+```js
 use admin
 db.auth( "admin", passwordPrompt() )
 db.version()
 rs.status()
-
 exit
-
+```
+```bash
 # Eleição de um novo nó primário no conjunto de réplicas do MongoDB
 kubectl exec -it mongodb-0 -- mongosh
-
+```
+```js
 use admin
 db.auth( "admin", passwordPrompt() )
 rs.stepDown()
 rs.status()
-
 exit
-
+```
+```bash
 # Remoção do pod que hospeda o antigo nó primário
 kubectl delete pod mongodb-0
 
@@ -297,16 +303,15 @@ kubectl get pods --selector=app=mongodb
 
 # Inspeção do MongoDB e definição da versão de compatibilidade
 kubectl exec -it mongodb-0 -- mongosh
-
+```
+```js
 use admin
 db.auth( "admin", passwordPrompt() )
 db.version()
 rs.status()
-
 db.adminCommand( { getParameter: 1, featureCompatibilityVersion: 1 } )
 db.adminCommand( { setFeatureCompatibilityVersion: "7.0", confirm: true } )
 db.adminCommand( { getParameter: 1, featureCompatibilityVersion: 1 } )
-
 exit
 ```
 
@@ -328,7 +333,5 @@ done
 
 # Referências
 - https://www.mongodb.com/developer/products/mongodb/mongodb-with-kubernetes/
-
-- https://cloud.google.com/stackdriver/docs/managed-prometheus/exporters/mongodb?hl=pt-br
 
 - https://www.mongodb.com/pt-br/docs/manual/release-notes/7.0-upgrade-replica-set/
