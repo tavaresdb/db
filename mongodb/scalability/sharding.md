@@ -10,7 +10,7 @@ As partições do MongoDB distribuem os dados em chunks. Cada chunk tem uma faix
 Em uma tentativa de obter uma distribuição uniforme de dados em todos os shards no cluster, um balanceador é executado em segundo plano para migrar faixas entre os shards.
 
 ## Arquitetura
-![](img/sharded-cluster-architecture.jpeg)
+![](../img/sharded-cluster-architecture.jpeg)
 
 Como implementar um Sharding? Consulte a [documentação](https://www.mongodb.com/pt-br/docs/manual/tutorial/deploy-shard-cluster/).
 
@@ -36,7 +36,7 @@ Se o seu modelo dedados exigir uma Shard Key com baixa cardinalidade, considere 
 
 Importante: Isso por si só não garante a distribuição uniforme dos dados no cluster. A frequência e o crescimento monotônico também são fatores que precisam ser considerados.
 
-![](img/sharded-cluster-ranged-distribution-low-cardinal.bakedsvg)
+![](../img/sharded-cluster-ranged-distribution-low-cardinal.bakedsvg)
 
 **Frequência**
 A frequência de uma Shard Key indica a constância com que um determinado valor aparece nos dados. Se a maioria dos documentos contiver apenas um subconjunto dos possíveis valores da Shard Key, os chunks que armazenam esses documentos podem se tornar um gargalo no cluster. Além disso, à medida que esses chunks crescem, eles podem se tornar [indivisíveis](https://www.mongodb.com/pt-br/docs/manual/core/sharding-data-partitioning/#std-label-jumbo-chunks). Isso reduzi a eficácia do dimensionamento horizontal do cluster.
@@ -45,7 +45,7 @@ Se o seu modelo de dados exigir que uma Shard Key com alta frequência, consider
 
 Importante: Isso por si só não garante a distribuição uniforme dos dados no cluster. A cardinalidade e o crescimento monotônico também são fatores que precisam ser considerados.
 
-![](img/sharded-cluster-ranged-distribution-frequency.bakedsvg)
+![](../img/sharded-cluster-ranged-distribution-frequency.bakedsvg)
 
 **Crescimento monotônico**
 Uma Shard Key em m valores que aumenta ou diminui monotonomicamente tem maior probabilidade de distribuir inserções para um único chunk em um cluster.
@@ -54,7 +54,7 @@ Se o seu modelo de dados exigir uma Shard Key cujo valor mude monotonomicamente,
 
 Importante: Isso por si só não garante a distribuição uniforme dos dados no cluster. A cardinalidade e a frequência também são fatores que precisam ser considerados.
 
-![](img/sharded-cluster-monotonic-distribution.bakedsvg)
+![](../img/sharded-cluster-monotonic-distribution.bakedsvg)
 
 **Query Patterns**
 A Shard Key ideal distribui os dados uniformemente pelo cluster e, ao mesmo tempo, facilita os padrões de query comuns. Ao escolher uma Shard Key, considere seus padrões de query mais comuns e se uma determinada Shard Key os abrange.
@@ -68,7 +68,7 @@ Cenário ideal:
 
 - Mudanças são monotônicas
 
-![](img/sharding-hash-based.bakedsvg)
+![](../img/sharding-hash-based.bakedsvg)
 
 **Ranged Sharding (Default)**
 Cenário ideal:
@@ -79,7 +79,7 @@ Cenário ideal:
 
 - Mudanças não são monotônicas
 
-![](img/sharding-range-based.bakedsvg)
+![](../img/sharding-range-based.bakedsvg)
 
 **Zones**
 Podemos associar cada zona a um ou mais shards no cluster. Um shard pode se associar a qualquer número de zonas. Em um cluster balanceado, o MongoDB migra os chunks cobertos por uma zona seomente para os shards associados à zona.
