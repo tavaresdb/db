@@ -67,7 +67,7 @@ db.killOp(opid)
 ## Ativando o Profiler para avaliação de operações lentas
 ```js
 // Identificando o atual nível do profiler
-db.getProfilingLevel()
+db.getProfilingStatus()
 
 // Ajustando o nível do profiler, de modo que somente operações lentas acima de 1s serão auditadas
 db.setProfilingLevel(1, 1000)
@@ -81,7 +81,7 @@ db.system.profile.find(
       $gt: new ISODate("2011-07-12T03:00:00Z"),
       $lt: new ISODate("2011-07-12T03:40:00Z")
     }
-  }, { query: 1 } ).sort( { millis: -1 } )
+  }, { command: 1 } ).sort( { millis: -1 } )
 ```
 
 ## Desativando o Profiler
@@ -179,7 +179,7 @@ db.createUser(
 db.changeUserPassword("user-name", passwordPrompt())
 ```
 
-## Redefinição de permissões pro usuário
+## Concessão de permissões adicionais pro usuário
 ```js
 db.getSiblingDB("admin").runCommand(
   {
