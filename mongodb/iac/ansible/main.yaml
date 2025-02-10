@@ -1,0 +1,8 @@
+---
+- hosts: rs0
+  roles:
+    - pd
+
+- hosts: rs0
+  roles:
+    - db

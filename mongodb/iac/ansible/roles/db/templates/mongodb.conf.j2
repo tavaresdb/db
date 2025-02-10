@@ -1,0 +1,38 @@
+systemLog:
+  destination: file
+  logAppend: true
+  logRotate: rename
+  path: {{ mongodb_log_path }}/mongod.log
+
+storage:
+  dbPath: {{ mongodb_path }}
+  directoryPerDB: true
+  journal:
+    enabled: true
+  wiredTiger:
+    engineConfig:
+          directoryForIndexes: true
+
+processManagement:
+  fork: true
+  pidFilePath: /var/run/mongod.pid
+  timeZoneInfo: /usr/share/zoneinfo
+
+net:
+{%if hostvars[inventory_hostname].group_names[0].startswith('rs') %}
+  port: {{ rs_port }}
+{% else %}
+  port: {{ rs_port }}
+{% endif %}
+  bindIp: localhost,{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}
+
+security:
+  authorization: enabled
+{% if use_tls %}
+  clusterAuthMode: x509
+{% else %}
+  keyFile: {{ keyFile_path }}
+{% endif %}
+
+replication:
+  replSetName: {{ hostvars[inventory_hostname].group_names[0] }}

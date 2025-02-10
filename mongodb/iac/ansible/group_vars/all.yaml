@@ -1,0 +1,14 @@
+mongo_root_password: "{{ lookup('env', 'MONGO_ROOT_PASSWORD') }}"
+
+rs_port: 27017
+
+mongo_path: /data/db
+mongo_log_path: /var/log/mongodb
+
+#mongo_extra_args: Definição de argumentos, tais como --tls --tlsCertificateKeyFile /path/client.pem --tlsCAFile /path/caToValidateServerCertificates.pem
+
+use_tls: false
+
+# Relevante, desde que use_tls: false
+keyFile_path: /data/keyfile
+keyfile_content: "{{ lookup('env', 'KEYFILE_CONTENT') }}"
