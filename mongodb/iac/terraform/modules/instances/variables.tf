@@ -13,7 +13,7 @@ variable "instance_name_prefix" {
   type        = string
 }
 
-variable "count" {
+variable "counter" {
   description = "Sufixo do nome da máquina virtual"
   type        = number
 }
@@ -23,7 +23,7 @@ variable "machine_type" {
   type        = string
 }
 
-variable "instance_tags" {
+variable "tags" {
   description = "Tags adicionadas as VMs"
   type        = list(string)
 }

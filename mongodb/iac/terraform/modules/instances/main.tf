@@ -1,9 +1,9 @@
 resource "google_compute_instance" "instances" {
-  count         = var.count
+  count         = var.counter
   name          = "${var.instance_name_prefix}-${count.index + 1}"
   zone          = var.zones[count.index % length(var.zones)]
   machine_type  = var.machine_type
-  instance_tags = var.instance_tags
+  tags          = var.tags
 
   boot_disk {
     initialize_params {
@@ -32,7 +32,7 @@ resource "google_compute_instance" "instances" {
 }
 
 resource "google_compute_disk" "additional_disk" {
-  count = var.additional_disk ? var.count : 0
+  count = var.additional_disk ? var.counter : 0
   name  = "${var.instance_name_prefix}-disk-${count.index + 1}"
   type  = "pd-ssd"
   zone  = var.zones[count.index % length(var.zones)]

@@ -38,31 +38,33 @@ module "iap" {
 # Módulo de Compute Engine (Instâncias dedicadas ao MongoDB com replicaSet)
 module "replicaSet_mongodb" {
   source               = "./modules/instances"
-  count                = 3
+  counter              = 3
   instance_name_prefix = "mongo"
   project_id           = var.project_id
   zones                = var.zones
   machine_type         = var.machine_type
-  instance_tags        = ["mongodb", "personal-project"]
+  tags                 = ["mongodb", "personal-project"]
   network              = module.network.network_name
   subnetwork           = module.network.subnetwork_name
   additional_disk      = true
   additional_disk_size = var.additional_disk_size
+  startup_script       = ""
   ssh_keys             = var.ssh_keys
 }
 
 # Módulo de Compute Engine (Instância dedicada ao Ansible, de modo que o Control Node configure as máquinas do inventário)
 module "controlNode_ansible" {
   source               = "./modules/instances"
-  count                = 1
+  counter              = 1
   instance_name_prefix = "ansible"
   project_id           = var.project_id
   zones                = [var.zones[0]]
   machine_type         = var.machine_type
-  instance_tags        = ["personal-project"]
+  tags                 = ["personal-project"]
   network              = module.network.network_name
   subnetwork           = module.network.subnetwork_name
   additional_disk      = false
+  additional_disk_size = 0
   startup_script       = var.ansible_startup_script
   ssh_keys             = var.ssh_keys
 }
