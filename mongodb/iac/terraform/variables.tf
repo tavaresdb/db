@@ -33,6 +33,12 @@ variable "ansible_startup_script" {
   default     = "scripts/ansible_startup.sh"
 }
 
+variable "mongodb_startup_script" {
+  description = "Script de inicialização para instalação do xfsprogs"
+  type        = string
+  default     = "scripts/mongodb_startup.sh"
+}
+
 variable "ssh_keys" {
   description = "Chave SSH pública"
   type        = string

@@ -49,7 +49,7 @@ variable "additional_disk_size" {
 }
 
 variable "startup_script" {
-  description = "Script de inicialização para instalação do Ansible"
+  description = "Script de inicialização"
   type        = string
 }
 

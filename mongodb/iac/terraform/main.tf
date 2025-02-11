@@ -48,7 +48,7 @@ module "replicaSet_mongodb" {
   subnetwork           = module.network.subnetwork_name
   additional_disk      = true
   additional_disk_size = var.additional_disk_size
-  startup_script       = ""
+  startup_script       = var.mongodb_startup_script
   ssh_keys             = var.ssh_keys
 }
 
