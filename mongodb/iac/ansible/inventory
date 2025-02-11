@@ -1,4 +1,4 @@
 [rs0]
-mongo-1.fqdn mongodb_primary=True
-mongo-2.fqdn
-mongo-3.fqdn
+mongo-1 mongodb_primary=True
+mongo-2
+mongo-3

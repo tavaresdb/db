@@ -20,8 +20,9 @@
           changed_when: false
 
         - name: Formatar o disco
-          command: mkfs.xfs -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/{{ item }}
-          when: fs_check.stdout == ''
+          # command: mkfs.xfs -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/{{ item }}
+          command: mkfs.xfs /dev/{{ item }}
+          when: fs_check.stdout is not defined
       loop: "{{ pd_mongo.stdout_lines }}"
       when: pd_mongo.stdout_lines | length > 0
 
