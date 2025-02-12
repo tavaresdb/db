@@ -1,0 +1,40 @@
+---
+# Formatação e montagem dos discos de dados
+- name: Identificar o nome do dispositivo do disco recém criado
+  shell: "ls -l /dev/disk/by-id/google-mongo-disk-* | awk '{print $NF}' | sed 's/\\.\\.\\/\\.\\.\\///'"
+  register: pd_mongo
+  failed_when: pd_mongo.stdout_lines | length == 0
+  changed_when: false
+
+- name: Formatar o disco se necessário
+  block:
+    - name: Verificar se o disco já está formatado
+      shell: "blkid /dev/{{ item }}"
+      register: fs_check
+      changed_when: false
+      loop: "{{ pd_mongo.stdout_lines }}"
+
+    - name: Formatar o disco
+      shell: "mkfs.xfs /dev/{{ item }}"
+      when: fs_check.stdout is not defined or fs_check.stdout | trim == ''
+      loop: "{{ pd_mongo.stdout_lines }}"
+  when: pd_mongo.stdout_lines | length > 0
+
+- name: Montar o disco
+  block:
+    - name: Criar diretório com as permissões necessárias
+      file:
+        path: /data
+        mode: 'a+w'
+        state: directory
+      loop: "{{ pd_mongo.stdout_lines }}"
+
+    - name: Montar o disco
+      mount:
+        path: /data
+        src: /dev/{{ item }}
+        fstype: xfs
+        opts: discard,defaults
+        state: mounted
+      loop: "{{ pd_mongo.stdout_lines }}"
+  when: pd_mongo.stdout_lines | length > 0

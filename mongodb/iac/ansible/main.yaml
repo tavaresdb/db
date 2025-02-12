@@ -1,8 +1,6 @@
 ---
 - hosts: rs0
+  become: yes
   roles:
     - pd
-
-- hosts: rs0
-  roles:
     - db
