@@ -10,5 +10,5 @@ mongodb_log_path: /var/log/mongodb
 use_tls: false
 
 # Relevante, desde que use_tls: false
-keyFile_path: /data/keyfile
+keyfile_path: /data/keyfile
 keyfile_content: "{{ lookup('env', 'KEYFILE_CONTENT') }}"

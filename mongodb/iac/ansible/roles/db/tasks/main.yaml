@@ -11,7 +11,10 @@
         - curl
 
     - name: Importação de chave pública
-      shell: "curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg --dearmor"
+      shell: |
+        if [ ! -f /usr/share/keyrings/mongodb-server-8.0.gpg ]; then
+          curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg --dearmor
+        fi
 
     - name: Criação do arquivo de lista
       shell: "echo \"deb [ signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] http://repo.mongodb.org/apt/debian bookworm/mongodb-org/8.0 main\" | tee /etc/apt/sources.list.d/mongodb-org-8.0.list"
@@ -25,10 +28,10 @@
     name: mongodb-org
     state: present
 
-- name: Copia o arquivo de configuração mongodb.conf para o nó
+- name: Copia o arquivo de configuração mongod.conf para o nó
   template:
-    src: templates/mongodb.conf.j2
-    dest: /etc/mongodb.conf
+    src: templates/mongod.conf.j2
+    dest: /etc/mongod.conf
     owner: root
     group: root
     mode: 0644
@@ -46,16 +49,17 @@
       file:
         path: "{{ mongodb_path }}"
         owner: mongodb
-        mode: '0750'
+        group: mongodb
+        mode: 0755
         state: directory
 
     - name: Configuração do keyfile se não for adotado SSL
       copy:
-        dest: "{{ keyFile_path }}"
+        dest: "{{ keyfile_path }}"
         content: "{{ keyfile_content }}"
         owner: mongodb
-        group: root
-        mode: '0600'
+        group: mongodb
+        mode: 0400
       when: not use_tls | bool
 
     - name: Inicialização do serviço
@@ -81,7 +85,7 @@
       template:
         src: templates/createRoot.js.j2
         dest: /tmp/createRoot.js
-        mode: '0644'
+        mode: 0644
       when: mongodb_primary is defined and mongodb_primary
 
     - name: Criação do usuário root

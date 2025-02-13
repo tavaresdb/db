@@ -11,7 +11,9 @@ resource "google_compute_instance" "instances" {
     }
   }
 
+  # O bloco dinâmico permite condicionalmente adicionar discos à máquina virtual
   dynamic "attached_disk" {
+    # O disco será adicionado somente se a variável retornar como verdadeiro
     for_each = var.additional_disk ? [1] : []
     content {
       source      = google_compute_disk.additional_disk[count.index].id
@@ -28,6 +30,7 @@ resource "google_compute_instance" "instances" {
     ssh-keys = var.ssh_keys
   }
 
+  # Script de inicialização será aplicado somente se a variável for preenchida
   metadata_startup_script = var.startup_script != "" ? file(var.startup_script) : null
 }
 

@@ -7,15 +7,12 @@ systemLog:
 storage:
   dbPath: {{ mongodb_path }}
   directoryPerDB: true
-  journal:
-    enabled: true
   wiredTiger:
     engineConfig:
-          directoryForIndexes: true
+      directoryForIndexes: true
 
 processManagement:
   fork: true
-  pidFilePath: /var/run/mongod.pid
   timeZoneInfo: /usr/share/zoneinfo
 
 net:
@@ -31,7 +28,7 @@ security:
 {% if use_tls %}
   clusterAuthMode: x509
 {% else %}
-  keyFile: {{ keyFile_path }}
+  keyFile: {{ keyfile_path }}
 {% endif %}
 
 replication:

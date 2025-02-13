@@ -11,12 +11,32 @@
     - name: Verificar se o disco já está formatado
       shell: "blkid /dev/{{ item }}"
       register: fs_check
+      failed_when: false
       changed_when: false
       loop: "{{ pd_mongo.stdout_lines }}"
 
     - name: Formatar o disco
       shell: "mkfs.xfs /dev/{{ item }}"
-      when: fs_check.stdout is not defined or fs_check.stdout | trim == ''
+      when: "fs_check.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | list | first is not search('TYPE=')"
+      # fs_check.results conterá uma lista de dicionários, onde cada dicionário representa um disco analisado
+      # por exemplo:
+      # fs_check:
+      #   results:
+      #     - item: "sda"
+      #       stout: "TYPE=\"xfs\""
+      #     - item: "sdb"
+      #       stout: ""
+      # isso indica que sda está formatado, diferentemente do sdb ...
+      #
+      # ... selectattr('item', 'equalto', item) filtra a lista, retornando apenas o resultado correspondente ao disco atual ...
+      #
+      # ... map(attribute='stdout') extrai apenas o valor de stdout, após a filtragem ...
+      #
+      # ... list | first converte o resultado em uma lista - por exemplo, se sdb estiver formatado como xfs, a saída será "TYPE=\"xfs\""
+      # se sdc não estiver formatado, a saída será "" ...
+      #
+      # ... is not search('TYPE=') irá verificar se a string não contém "TYPE=", que indicaria um sistema de arquivos
+      # se identificado um sistema de arquivos, a formatação deve ocorrer, caso contrário a formatação não deve ocorrer
       loop: "{{ pd_mongo.stdout_lines }}"
   when: pd_mongo.stdout_lines | length > 0
 
@@ -25,7 +45,7 @@
     - name: Criar diretório com as permissões necessárias
       file:
         path: /data
-        mode: 'a+w'
+        mode: 0755
         state: directory
       loop: "{{ pd_mongo.stdout_lines }}"
 
