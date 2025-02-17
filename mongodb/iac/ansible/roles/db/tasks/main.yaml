@@ -65,6 +65,7 @@
     - name: Inicialização do serviço
       service:
         name: mongod
+        enabled: yes
         state: restarted
 
     - name: Aguardando a inicialização do serviço
