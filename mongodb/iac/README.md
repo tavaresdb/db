@@ -1,0 +1,1 @@
+Esse repositório abordará diversos temas sobre os principais sistemas gerenciadores de bancos de dados.
