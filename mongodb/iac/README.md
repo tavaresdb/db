@@ -1,1 +1,1 @@
-Esse repositório abordará diversos temas sobre os principais sistemas gerenciadores de bancos de dados.
+Para maiores detalhes, consulte o artigo [Provisionamento de infraestrutura na Google Cloud com Terraform e Ansible](https://www.linkedin.com/pulse/provisionamento-de-infraestrutura-na-google-cloud-com-tavares-mlk9f).
