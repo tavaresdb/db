@@ -32,8 +32,8 @@
       #
       # ... map(attribute='stdout') extrai apenas o valor de stdout, após a filtragem ...
       #
-      # ... list | first converte o resultado em uma lista - por exemplo, se sdb estiver formatado como xfs, a saída será "TYPE=\"xfs\""
-      # se sdc não estiver formatado, a saída será "" ...
+      # ... list | first converte o resultado em uma lista - por exemplo, se sda estiver formatado como xfs, a saída será "TYPE=\"xfs\""
+      # se sdb não estiver formatado, a saída será "" ...
       #
       # ... is not search('TYPE=') irá verificar se a string não contém "TYPE=", que indicaria um sistema de arquivos
       # se identificado um sistema de arquivos, a formatação deve ocorrer, caso contrário a formatação não deve ocorrer
