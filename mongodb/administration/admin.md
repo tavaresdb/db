@@ -308,7 +308,7 @@ mongorestore \
   --authenticationDatabase=admin \
   --collection="rest-coll" \
   --db="db-name" \
-  /opt/backup/db-name
+  /opt/backup/db-name/coll.bson
 ```
 
 ```bash
