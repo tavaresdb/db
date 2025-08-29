@@ -1,5 +1,6 @@
 -- Avalie se a engine federated está disponível. Caso não, pode ser necessário adequar o my.cnf, adicionando a variável: federated = ON (Alteração requer reinicialização).
 -- https://www.percona.com/blog/overview-of-mysql-alternative-storage-engines/
+
 SELECT * FROM information_schema.engines WHERE engine = 'federated';
 
 CREATE TABLE db.stg_local (
