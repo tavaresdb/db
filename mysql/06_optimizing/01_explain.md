@@ -15,10 +15,10 @@ mysql> EXPLAIN SELECT * FROM employees WHERE emp_no=10001\G
    partitions: NULL
          type: const
 possible_keys: PRIMARY
-         key: PRIMARY
-     key_len: 4
-         ref: const
-        rows: 1
+          key: PRIMARY
+      key_len: 4
+          ref: const
+         rows: 1
      filtered: 100.00
         Extra: NULL
 1 row in set, 1 warning (#.## sec)
