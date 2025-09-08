@@ -1,8 +1,10 @@
 # Arquitetura do InnoDB
 **InnoDB 5.7**
+
 ![](img/architecture_57.png)
 
 **InnoDB 8.0**
+
 ![](img/architecture_80.png)
 
 ## Estruturas de memória
