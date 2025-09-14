@@ -13,8 +13,8 @@ log_slow_admin_statements = OFF          # Se necessário, audite operações ad
 Para facilitar a análise, podemos utilizar o utilitário `mysqldumpslow`, que irá sumarizar os dados do slow query log e facilitará a identificação das operações mais demoradas ou das mais frequentes acima do tempo desejado. Por exemplo:
 
 ```bash
-mysqldumpslow -s 't' -t '10' host_name-slow.log # 10 operações com maior tempo de execução
-mysqldumpslow -s 'c' -t '5' host_name-slow.log # 5 operações mais frequentes
+mysqldumpslow -s 't' -t '10' hostname-slow.log # 10 operações com maior tempo de execução
+mysqldumpslow -s 'c' -t '5' hostname-slow.log # 5 operações mais frequentes
 ```
 
 > - O parâmetro `-a` remove as máscaras dos valores, mas acaba inutilizando o agrupamento.
