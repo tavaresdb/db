@@ -37,7 +37,7 @@ Após uma conexão ser estabelecida, o MySQL processa cada consulta na camada SQ
 ![](img/sql_statement_processing.png)
 
 ## Camada de armazenamento
-Ao realizar uma transação, o cliente escreve alterações nos dados no log buffer, que reside na memória. O InnoDB grava esse conteúdo em disco no redo log quando a transação é confirmada, no entanto essa gravação pode ser configurada para ocorrer com menos frequência, através da variável `sync_binlog` - consulte [esse](https://github.com/tavaresdb/db/blob/main/mysql/04_config/02_db/02_variables.md) artigo para maiores detalhes sobre a variável. Se ocorrer uma falha enquanto as tabelas estão sendo modificadas, os arquivos de redo log serão usados para recuperação automática. Quando o servidor MySQL é reiniciado, ele reaplica as alterações registradas nos logs para garantir que as tabelas reflitam todas as transações que foram efetivadas.
+Ao realizar uma transação, o cliente escreve alterações nos dados no log buffer, que reside na memória. O InnoDB grava esse conteúdo em disco no redo log quando a transação é confirmada, no entanto essa gravação pode ser configurada para ocorrer com menos frequência, através da variável `innodb_flush_log_at_trx_commit` - consulte [esse](https://github.com/tavaresdb/db/blob/main/mysql/04_config/02_db/02_variables.md#innodb_flush_log_at_trx_commit) artigo para maiores detalhes sobre a variável. Se ocorrer uma falha enquanto as tabelas estão sendo modificadas, os arquivos de redo log serão usados para recuperação automática. Quando o servidor MySQL é reiniciado, ele reaplica as alterações registradas nos logs para garantir que as tabelas reflitam todas as transações que foram efetivadas.
 
 ![](img/log_files_&_buffers.png)
 
