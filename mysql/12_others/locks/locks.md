@@ -78,7 +78,7 @@ SELECT OBJECT_TYPE,
 
 > Você pode opcionalmente fazer junções em outras tabelas do Performance Schema, como [performance_schema.events_statements_current](https://dev.mysql.com/doc/refman/8.0/en/performance-schema-events-statements-current-table.html), para obter mais detalhes sobre as conexões envolvidas na espera de bloqueio.
 
-Consulte [essa]() seção complementar.
+Consulte [essa](https://github.com/tavaresdb/db/blob/main/mysql/12_others/locks/locks.md#metadata-locks) seção complementar.
 
 ### Data locks
 Os bloqueios de dados estão em um nível intermediário entre os bloqueios de metadados e os objetos de sincronização. As informações sobre bloqueios de dados são divididas em duas tabelas:
@@ -319,7 +319,7 @@ As métricas `innodb_row_lock_%`, `lock_deadlocks` e `lock_timeouts` são as mai
 
 Se você encontrar contenção de mutex ou semáforo do InnoDB, a métrica `innodb_rwlock_%` é útil para monitorar a taxa de ocorrência das esperas e quantas rodadas são gastas em espera.
 
-> Podemos observar que nem todas as métricas estão habilitadas por padrão. Na [próxima seção]() vamos investigar como é possível habilitar, desabilitar e redefinir as métricas provenientes da tabela [information_schema.INNODB_METRICS](https://dev.mysql.com/doc/refman/8.0/en/information-schema-innodb-metrics-table.html).
+> Podemos observar que nem todas as métricas estão habilitadas por padrão. Na [próxima seção](https://github.com/tavaresdb/db/blob/main/mysql/12_others/locks/locks.md#configurando-as-m%C3%A9tricas-do-innodb) vamos investigar como é possível habilitar, desabilitar e redefinir as métricas provenientes da tabela [information_schema.INNODB_METRICS](https://dev.mysql.com/doc/refman/8.0/en/information-schema-innodb-metrics-table.html).
 
 Veja também:
 
@@ -327,7 +327,7 @@ Veja também:
 - https://dev.mysql.com/doc/refman/8.0/en/innodb-information-schema-metrics-table.html
 
 ### Configurando as métricas do InnoDB
-As métricas do InnoDB podem ser configuradas - permitindo a ativação, desativação e redefinição das métricas - usando variáveis ​​globais do sistema:
+As métricas do InnoDB podem ser configuradas - permitindo a ativação, desativação e redefinição das métricas - usando variáveis globais do sistema:
 
 - `innodb_monitor_disable`: Desativa uma ou mais métricas.
 - `innodb_monitor_enable`: Ativa uma ou mais métricas.
@@ -574,7 +574,7 @@ trx_rows_modified: 0
         statement: SELECT COUNT(*) FROM world.city WHERE ID > SLEEP(0.01)
 ```
 
-Outro item que requer monitoramento é o History List Length (HLL) - esse conceito será detalhado melhor [aqui](). Mais detalhes, abaixo:
+Outro item que requer monitoramento é o History List Length (HLL) - esse conceito será detalhado melhor [aqui](https://github.com/tavaresdb/db/blob/main/mysql/12_others/locks/locks.md#undo-logs). Mais detalhes, abaixo:
 
 ```sql
 -- Conexão 3
@@ -1187,7 +1187,7 @@ current_statement: SELECT *   FROM world.city  WHERE ID = 201
 ```
 
 ## Metadata locks
-Esse tipo de bloqueio já foi discutido inicialmente [aqui](). Agora, iremos explorar os seguintes itens:
+Esse tipo de bloqueio já foi discutido inicialmente [aqui](https://github.com/tavaresdb/db/blob/main/mysql/12_others/locks/locks.md#metadata-e-table-locks). Agora, iremos explorar os seguintes itens:
 
 ### Sintomas
 Os sintomas a serem observados são os seguintes:
@@ -1594,7 +1594,7 @@ UNLOCK TABLES;
 ## Bloqueios de tabela implícitos
 O MySQL utiliza bloqueios implícitos em tabelas quando estas são manipuladas. Os bloqueios de tabela não desempenham um papel significativo em tabelas InnoDB, exceto para flush, metadados e bloqueios explícitos, visto que o InnoDB utiliza bloqueios de linha para permitir o acesso simultâneo a uma tabela - desde que as transações não modifiquem as mesmas linhas.
 
-O InnoDB, no entanto, trabalha com o conceito de bloqueios intencionais no nível da tabela. Como é provável que você encontre esses bloqueios ao investigar problemas de bloqueio, vale a pena familiarizar-se com eles. Conforme mencionado na discussão sobre [lock access levels](), os bloqueios intencionais marcam a intenção da transação.
+O InnoDB, no entanto, trabalha com o conceito de bloqueios intencionais no nível da tabela. Como é provável que você encontre esses bloqueios ao investigar problemas de bloqueio, vale a pena familiarizar-se com eles. Conforme mencionado na discussão sobre [lock access levels](https://github.com/tavaresdb/db/blob/main/mysql/12_others/locks/locks.md#lock-access-levels), os bloqueios intencionais marcam a intenção da transação.
 
 Para bloqueios obtidos por transações, primeiro é obtido um bloqueio intencional, que pode então ser atualizado, se necessário. Isso difere de um bloqueio explícito `LOCK TABLES`, que não se altera. Para obter um bloqueio compartilhado, a transação primeiro obtém um bloqueio intencional compartilhado e, em seguida, o bloqueio compartilhado. Da mesma forma para um bloqueio exclusivo, onde primeiro é obtido um bloqueio intencional exclusivo. Alguns exemplos de bloqueios intencionais são os seguintes:
 
@@ -1832,9 +1832,9 @@ As alterações realizadas durante uma transação precisam ser registradas para
 
 O tamanho da parte ativa do undo log pode ser observado pelo History List Length (HLL). Esse indicador representa a quantidade de registros de undo gerados por transações já confirmadas que ainda não foram removidos pelo processo de purge. Vale destacar que o HLL não mede diretamente o número total de alterações de linhas. Em vez disso, ele indica quantas versões antigas de linhas ainda precisam ser consideradas ao reconstruir o estado correto dos dados durante uma operação. Quanto maior for essa cadeia de versões, mais trabalho o banco de dados precisa realizar para encontrar a versão visível de cada linha. Em casos extremos, um HLL elevado pode impactar significativamente o desempenho das operações.
 
-O que determina um HLL grande? Não existem regras rígidas sobre isso – apenas que quanto menor, melhor. Normalmente problemas de desempenho começam a aparecer quando a lista ultrapassa o valor de 1 mil, mas o ponto em que ela se torna um gargalo costuma variar.
+O que determina um HLL grande? Não existem regras rígidas sobre isso - apenas que quanto menor, melhor. Normalmente problemas de desempenho começam a aparecer quando a lista ultrapassa o valor de 1 mil, mas o ponto em que ela se torna um gargalo costuma variar.
 
-> Caso tenha curiosidade sobre como monitorar o HLL, retorne nessa [seção](). Aproveite e leia também:
+> Caso tenha curiosidade sobre como monitorar o HLL, retorne nessa [seção](https://github.com/tavaresdb/db/blob/main/mysql/12_others/locks/locks.md#lock-access-levels). Aproveite e leia também:
 >
 > - [What is InnoDB History List Length?](https://www.youtube.com/watch?v=_LMsG4RWfMk&list=PLWx5a9Tn2EvG4C90YFJ9eU61IpALeE0SN&index=98)
 > - [How to monitor InnoDB History List Length?](https://www.youtube.com/watch?v=Omp-RUWw9Iw&list=PLWx5a9Tn2EvG4C90YFJ9eU61IpALeE0SN&index=99)
