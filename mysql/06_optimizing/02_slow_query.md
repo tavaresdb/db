@@ -18,4 +18,5 @@ mysqldumpslow -s 'c' -t '5' hostname-slow.log # 5 operações mais frequentes
 ```
 
 > - O parâmetro `-a` remove as máscaras dos valores, mas acaba inutilizando o agrupamento.
-> - Alternativamente, caso conte com o Percona Toolkit, o diagnóstico pode ser realizado com o utilitário `pt-query-digest`.
+> - Alternativamente, caso conte com o Percona Toolkit, o diagnóstico pode ser realizado com o utilitário [pt-query-digest](https://severalnines.com/blog/analyzing-your-sql-workload-using-pt-query-digest/).
+>   - Por exemplo: `pt-query-digest --limit=100% hostname-slow.log > ptqd.out`.

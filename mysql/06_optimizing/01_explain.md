@@ -61,5 +61,7 @@ EXPLAIN: -> Filter: (dept_manager.dept_no = 'd001') (cost=0.45 rows=2) (actual t
   -> Index lookup on dept_manager using dept_no ('d001') (cost=0.45 rows=2) (actual time=0.017..0.020 rows=2 loops=1)
 ```
 
-# Referência
+# Referências
 - Curso MySQL 8.0 for Database Administrators, https://mylearn.oracle.com/ou/course/mysql-80-for-database-administrators/76889
+
+- https://comunidademysql.com.br/como-interpretar-mysql-explain-performance/
